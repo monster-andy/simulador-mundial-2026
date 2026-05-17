@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- SIMULADOR MUNDIAL 2026 · v1.3.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -26,8 +27,9 @@ header{
   position:sticky;top:0;z-index:100;
   background:rgba(10,14,26,.96); backdrop-filter:blur(12px);
 }
-.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;white-space:nowrap;}
-.logo span{color:var(--accent);}
+.logo{font-family:'Bebas Neue',sans-serif;line-height:1;letter-spacing:2px;white-space:nowrap;}
+.logo-top{font-size:14px;color:var(--text);display:block;letter-spacing:3px;}
+.logo-bottom{font-size:22px;color:var(--accent);display:block;letter-spacing:3px;}
 .header-right{display:flex;align-items:center;gap:10px;justify-content:flex-end;}
 .api-indicator{font-size:11px;color:var(--green);display:flex;align-items:center;gap:5px;white-space:nowrap;}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
@@ -83,16 +85,22 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 .groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
 .group-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
 .group-card:hover{border-color:var(--border2);}
-.group-header{background:var(--surface2);padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.group-header{background:var(--surface2);padding:10px 14px;border-bottom:1px solid var(--border);}
+.group-header-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
 .group-letter{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--accent);line-height:1;}
 .group-info{flex:1;}
 .group-name{font-size:11px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:1px;}
-.group-teams-preview{font-size:10px;color:var(--muted);margin-top:2px;}
-.group-actions{display:flex;gap:6px;}
+.group-teams-flags{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:6px;}
+.group-team-pill{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);}
+.group-team-pill .tf{font-size:15px;}
+.group-actions{display:flex;gap:6px;flex-wrap:wrap;}
 .btn-group-action{padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;border:1px solid var(--border2);
   background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .2s;}
 .btn-group-action:hover{color:var(--accent);border-color:var(--accent);}
 .btn-group-reset{color:var(--red);} .btn-group-reset:hover{color:var(--red);border-color:var(--red);background:rgba(239,68,68,.08);}
+
+/* FOOTER */
+.site-footer{text-align:center;padding:1.5rem;font-size:11px;color:rgba(255,255,255,.2);letter-spacing:.5px;}
 
 /* STANDINGS */
 .group-standings{padding:6px 14px;border-bottom:1px solid var(--border);}
@@ -194,7 +202,7 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 
 @media(max-width:640px){
   header{grid-template-columns:1fr auto;grid-template-rows:auto auto;}
-  .logo{font-size:18px;}
+  .logo-top{font-size:11px;} .logo-bottom{font-size:17px;}
   .nav-tabs{grid-column:1/-1;order:3;}
   .header-right{order:2;}
   main{padding:.75rem;}
@@ -210,7 +218,7 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 <body>
 
 <header>
-  <div class="logo">SIMULADOR <span>MUNDIAL 2026</span></div>
+  <div class="logo"><span class="logo-top" id="logo-top">SIMULADOR</span><span class="logo-bottom" id="logo-bottom">MUNDIAL 2026</span></div>
   <div class="header-right">
     <div class="api-indicator"><span class="dot"></span> <span data-t="active"></span></div>
     <button class="lang-btn" onclick="toggleLang()">🌐 <span id="lang-label">EN</span></button>
@@ -326,6 +334,7 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
+<footer class="site-footer">v1.3.0 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -335,8 +344,10 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 // ============================================================
 const LANG = {
   es: {
+    logo_top:'SIMULADOR', logo_bottom:'MUNDIAL 2026',
     active:'Simulador activo', nav_groups:'Grupos', nav_r16:'16vos', nav_r8:'Octavos',
     nav_r4:'Cuartos', nav_r2:'Semis', nav_r1:'Final',
+    group_singular:'GRUPO',
     groups_title:'FASE DE GRUPOS', groups_sub:'12 grupos · 48 selecciones · Los 2 primeros y los 8 mejores terceros avanzan',
     r16_title:'DIECISEISAVOS DE FINAL', r16_sub:'32 equipos clasificados',
     r8_title:'OCTAVOS DE FINAL', r8_sub:'16 equipos clasificados',
@@ -363,8 +374,10 @@ const LANG = {
     group_sim_all:'⚡ Simular', group_resim_all:'↺ Resimular', group_reset:'🗑 Reset',
   },
   en: {
+    logo_top:'SIMULATOR', logo_bottom:'WORLD CUP 2026',
     active:'Simulator active', nav_groups:'Groups', nav_r16:'Round of 32', nav_r8:'Round of 16',
     nav_r4:'Quarter-finals', nav_r2:'Semi-finals', nav_r1:'Final',
+    group_singular:'GROUP',
     groups_title:'GROUP STAGE', groups_sub:'12 groups · 48 teams · Top 2 from each group + 8 best 3rd-place teams advance',
     r16_title:'ROUND OF 32', r16_sub:'32 qualified teams',
     r8_title:'ROUND OF 16', r8_sub:'16 qualified teams',
@@ -400,13 +413,14 @@ function applyLang() {
   document.documentElement.lang = currentLang;
   document.getElementById('page-title').textContent = currentLang === 'es' ? 'Simulador Mundial 2026' : '2026 World Cup Simulator';
   document.getElementById('lang-label').textContent = currentLang === 'es' ? 'EN' : 'ES';
+  const lt=document.getElementById('logo-top'), lb=document.getElementById('logo-bottom');
+  if(lt) lt.textContent=t('logo_top');
+  if(lb) lb.textContent=t('logo_bottom');
   document.querySelectorAll('[data-t]').forEach(el => {
     const key = el.getAttribute('data-t');
     el.textContent = t(key);
   });
-  // Rebuild groups UI to update labels
   buildGroupsUI();
-  // Re-render active bracket if any
   const activeSection = document.querySelector('.section.active');
   if (activeSection && activeSection.id !== 'section-grupos') {
     const rk = activeSection.id.replace('section-','');
@@ -587,17 +601,22 @@ function buildGroupsUI(){
   grid.innerHTML='';
   Object.keys(GROUPS).forEach(gk=>{
     const g=GROUPS[gk];
-    if(!groupStandings[gk]){
-      groupStandings[gk]=g.teams.map((tm,i)=>({idx:i,team:tm,pts:0,gf:0,ga:0,gd:0,mp:0}));
-    }
+    // Always reinitialise standings in original team order
+    groupStandings[gk]=g.teams.map((tm,i)=>({idx:i,team:tm,pts:0,gf:0,ga:0,gd:0,mp:0}));
+
     const card=document.createElement('div');
     card.className='group-card'; card.id=`gc-${gk}`;
 
+    // Header: two rows — top: letter + name | bottom: team flags + actions
     const header=`<div class="group-header">
-      <div class="group-letter">${gk}</div>
-      <div class="group-info">
-        <div class="group-name">${t('nav_groups')} ${gk}</div>
-        <div class="group-teams-preview">${g.teams.map(tm=>tm.f+' '+tm.n).join(' · ')}</div>
+      <div class="group-header-top">
+        <div class="group-letter">${gk}</div>
+        <div class="group-info">
+          <div class="group-name">${t('group_singular')} ${gk}</div>
+        </div>
+      </div>
+      <div class="group-teams-flags">
+        ${g.teams.map(tm=>`<span class="group-team-pill"><span class="tf">${tm.f}</span>${tm.n}</span>`).join('')}
       </div>
       <div class="group-actions">
         <button class="btn-group-action" onclick="simGroupAll('${gk}')">${t('group_sim_all')}</button>
@@ -607,9 +626,9 @@ function buildGroupsUI(){
     </div>`;
 
     const standHdr=`<div class="standings-row hdr"><div></div><div></div><div style="text-align:center">PJ</div><div style="text-align:center">GD</div><div class="pts">Pts</div></div>`;
-    const standRows=g.teams.map((_,i)=>`<div class="standings-row" id="sr-${gk}-${i}">
+    const standRows=g.teams.map((tm,i)=>`<div class="standings-row">
       <div class="pos">${i+1}</div>
-      <div class="flag-name"><div class="ebar"></div><span class="s-flag">${g.teams[i].f}</span><span class="s-name">${g.teams[i].n}</span></div>
+      <div class="flag-name"><div class="ebar"></div><span class="s-flag">${tm.f}</span><span class="s-name">${tm.n}</span></div>
       <div style="text-align:center">0</div><div style="text-align:center">0</div><div class="pts">0</div>
     </div>`).join('');
 
@@ -719,7 +738,9 @@ function resetGroup(gk){
 function updateStandings(gk){
   const g=GROUPS[gk],s=groupStandings[gk];
   if(!s)return;
+  // Reset stats
   s.forEach(r=>{r.pts=0;r.gf=0;r.ga=0;r.gd=0;r.mp=0;});
+  // Accumulate
   g.matches.forEach((m,mi)=>{
     const r=groupResults[`${gk}-${mi}`]; if(!r)return;
     const h=s.find(x=>x.idx===m.h),a=s.find(x=>x.idx===m.a);
@@ -727,19 +748,24 @@ function updateStandings(gk){
     h.gd=h.gf-h.ga;a.gd=a.gf-a.ga;
     if(r.hg>r.ag)h.pts+=3; else if(r.hg<r.ag)a.pts+=3; else{h.pts+=1;a.pts+=1;}
   });
+  // Sort
   s.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);
-  s.forEach((row,rank)=>{
-    const el=document.getElementById(`sr-${gk}-${row.idx}`); if(!el)return;
+  // Rebuild standings container in sorted order
+  const container=document.getElementById(`gs-${gk}`); if(!container)return;
+  const hdr=`<div class="standings-row hdr"><div></div><div></div><div style="text-align:center">PJ</div><div style="text-align:center">GD</div><div class="pts">Pts</div></div>`;
+  const rows=s.map((row,rank)=>{
     const q=rank<2;
-    el.className='standings-row'+(q?' qualified':'');
-    el.innerHTML=`<div class="pos">${rank+1}</div>
+    return `<div class="standings-row${q?' qualified':''}">
+      <div class="pos">${rank+1}</div>
       <div class="flag-name"><div class="${q?'qbar':'ebar'}"></div>
         <span class="s-flag">${row.team.f}</span><span class="s-name">${row.team.n}</span>
       </div>
       <div style="text-align:center">${row.mp}</div>
       <div style="text-align:center">${row.gd>0?'+':''}${row.gd}</div>
-      <div class="pts">${row.pts}</div>`;
-  });
+      <div class="pts">${row.pts}</div>
+    </div>`;
+  }).join('');
+  container.innerHTML=hdr+rows;
 }
 
 // ============================================================
