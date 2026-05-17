@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v1.3.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v1.4.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -27,8 +27,8 @@ header{
   position:sticky;top:0;z-index:100;
   background:rgba(10,14,26,.96); backdrop-filter:blur(12px);
 }
-.logo{font-family:'Bebas Neue',sans-serif;line-height:1;letter-spacing:2px;white-space:nowrap;}
-.logo-top{font-size:14px;color:var(--text);display:block;letter-spacing:3px;}
+.logo{font-family:'Bebas Neue',sans-serif;line-height:1.05;letter-spacing:2px;white-space:nowrap;display:inline-flex;flex-direction:column;}
+.logo-top{font-size:14px;color:var(--text);display:block;letter-spacing:5.5px;}
 .logo-bottom{font-size:22px;color:var(--accent);display:block;letter-spacing:3px;}
 .header-right{display:flex;align-items:center;gap:10px;justify-content:flex-end;}
 .api-indicator{font-size:11px;color:var(--green);display:flex;align-items:center;gap:5px;white-space:nowrap;}
@@ -86,13 +86,13 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 .group-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
 .group-card:hover{border-color:var(--border2);}
 .group-header{background:var(--surface2);padding:10px 14px;border-bottom:1px solid var(--border);}
-.group-header-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.group-letter{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--accent);line-height:1;}
-.group-info{flex:1;}
-.group-name{font-size:11px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:1px;}
-.group-teams-flags{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:6px;}
-.group-team-pill{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);}
-.group-team-pill .tf{font-size:15px;}
+.group-header-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.group-letter{font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--accent);line-height:1;}
+.group-name{font-size:11px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.group-flags-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.group-flag-chip{display:flex;flex-direction:column;align-items:center;gap:1px;}
+.group-flag-chip .gf{font-size:20px;line-height:1;}
+.group-flag-chip .gi{font-size:9px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
 .group-actions{display:flex;gap:6px;flex-wrap:wrap;}
 .btn-group-action{padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;border:1px solid var(--border2);
   background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .2s;}
@@ -334,7 +334,7 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v1.3.0 · by MonsterAndy</footer>
+<footer class="site-footer">v1.4.0 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -416,6 +416,14 @@ function applyLang() {
   const lt=document.getElementById('logo-top'), lb=document.getElementById('logo-bottom');
   if(lt) lt.textContent=t('logo_top');
   if(lb) lb.textContent=t('logo_bottom');
+  // After render, match logo-top width to logo-bottom by adjusting letter-spacing
+  requestAnimationFrame(()=>{
+    if(lt&&lb){
+      const diff=lb.offsetWidth-lt.offsetWidth;
+      const chars=lt.textContent.length;
+      if(chars>1) lt.style.letterSpacing=((diff/chars)+5.5)+'px';
+    }
+  });
   document.querySelectorAll('[data-t]').forEach(el => {
     const key = el.getAttribute('data-t');
     el.textContent = t(key);
@@ -607,16 +615,16 @@ function buildGroupsUI(){
     const card=document.createElement('div');
     card.className='group-card'; card.id=`gc-${gk}`;
 
-    // Header: two rows — top: letter + name | bottom: team flags + actions
+    // Header: big letter + flag chips on top row, actions on second row
     const header=`<div class="group-header">
       <div class="group-header-top">
-        <div class="group-letter">${gk}</div>
-        <div class="group-info">
-          <div class="group-name">${t('group_singular')} ${gk}</div>
+        <div class="group-letter">${t('group_singular')} ${gk}</div>
+        <div class="group-flags-row">
+          ${g.teams.map(tm=>{
+            const initials=tm.n.split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase();
+            return `<div class="group-flag-chip"><span class="gf">${tm.f}</span><span class="gi">${initials}</span></div>`;
+          }).join('')}
         </div>
-      </div>
-      <div class="group-teams-flags">
-        ${g.teams.map(tm=>`<span class="group-team-pill"><span class="tf">${tm.f}</span>${tm.n}</span>`).join('')}
       </div>
       <div class="group-actions">
         <button class="btn-group-action" onclick="simGroupAll('${gk}')">${t('group_sim_all')}</button>
@@ -924,6 +932,16 @@ async function simKO(rk,idx,silent=false){
 }
 
 async function simAllRound(rk){
+  // Guard: check prerequisites
+  if(rk==='r16'&&!groupsDone()){
+    showToast(t('pending_title')+' — '+t('go_groups'));
+    return;
+  }
+  const prev=prevRoundKey(rk);
+  if(prev&&rounds[prev].some(m=>!m.winner)){
+    showToast(t('pending_title'));
+    return;
+  }
   if(rk==='r16')populateR16();
   const btn=document.getElementById(`btn-sim-all-${rk}`);
   if(btn)btn.disabled=true;
@@ -939,6 +957,10 @@ async function simAllRound(rk){
 }
 
 async function resimAllRound(rk){
+  // Guard: check prerequisites
+  if(rk==='r16'&&!groupsDone()){showToast(t('pending_title'));return;}
+  const prev=prevRoundKey(rk);
+  if(prev&&rounds[prev].some(m=>!m.winner)){showToast(t('pending_title'));return;}
   askConfirm(t('confirm_resim_title'),t('confirm_resim_msg'),async()=>{
     // Reset subsequent rounds
     const nextRk={r16:'r8',r8:'r4',r4:'r2',r2:'r1'}[rk];
