@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v1.4.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v1.8.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -27,9 +27,10 @@ header{
   position:sticky;top:0;z-index:100;
   background:rgba(10,14,26,.96); backdrop-filter:blur(12px);
 }
-.logo{font-family:'Bebas Neue',sans-serif;line-height:1.05;letter-spacing:2px;white-space:nowrap;display:inline-flex;flex-direction:column;}
-.logo-top{font-size:14px;color:var(--text);display:block;letter-spacing:5.5px;}
-.logo-bottom{font-size:22px;color:var(--accent);display:block;letter-spacing:3px;}
+.logo{font-family:'Bebas Neue',sans-serif;line-height:1.05;white-space:nowrap;display:inline-flex;flex-direction:column;}
+.logo-top{font-size:22px;color:var(--text);display:block;letter-spacing:5.5px;}
+.logo-bottom{font-size:38px;color:var(--accent);display:block;letter-spacing:3px;}
+.logo-credit{font-size:9px;color:rgba(255,255,255,.25);letter-spacing:2px;margin-top:1px;display:block;font-family:'DM Sans',sans-serif;}
 .header-right{display:flex;align-items:center;gap:10px;justify-content:flex-end;}
 .api-indicator{font-size:11px;color:var(--green);display:flex;align-items:center;gap:5px;white-space:nowrap;}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
@@ -73,10 +74,10 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 .btn-primary{padding:8px 18px;background:var(--accent);color:#0a0e1a;border:none;border-radius:7px;
   font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
 .btn-primary:hover{opacity:.85;} .btn-primary:disabled{opacity:.35;cursor:not-allowed;}
-.btn-danger{padding:8px 18px;background:transparent;color:var(--red);border:1px solid var(--red);
-  border-radius:7px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;
-  cursor:pointer;transition:all .2s;white-space:nowrap;}
-.btn-danger:hover{background:rgba(239,68,68,.1);}
+.btn-icon-reset{width:32px;height:32px;padding:0;background:transparent;color:var(--muted);
+  border:none;border-radius:7px;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.btn-icon-reset:hover{background:rgba(239,68,68,.12);color:var(--red);}
 .btn-ghost{padding:8px 16px;background:transparent;color:var(--muted);border:1px solid var(--border2);
   border-radius:7px;font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap;font-family:'DM Sans',sans-serif;}
 .btn-ghost:hover{color:var(--text);border-color:var(--border2);}
@@ -87,17 +88,20 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 .group-card:hover{border-color:var(--border2);}
 .group-header{background:var(--surface2);padding:10px 14px;border-bottom:1px solid var(--border);}
 .group-header-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
-.group-letter{font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--accent);line-height:1;}
+.group-letter{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);line-height:1;}
 .group-name{font-size:11px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
 .group-flags-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .group-flag-chip{display:flex;flex-direction:column;align-items:center;gap:1px;}
 .group-flag-chip .gf{font-size:20px;line-height:1;}
 .group-flag-chip .gi{font-size:9px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
-.group-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.group-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .btn-group-action{padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;border:1px solid var(--border2);
   background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .2s;}
 .btn-group-action:hover{color:var(--accent);border-color:var(--accent);}
-.btn-group-reset{color:var(--red);} .btn-group-reset:hover{color:var(--red);border-color:var(--red);background:rgba(239,68,68,.08);}
+.btn-group-reset{width:26px;height:26px;padding:0;border-radius:5px;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);border-color:transparent;}
+.btn-group-reset:hover{color:var(--red)!important;border-color:transparent!important;background:rgba(239,68,68,.1)!important;}
 
 /* FOOTER */
 .site-footer{text-align:center;padding:1.5rem;font-size:11px;color:rgba(255,255,255,.2);letter-spacing:.5px;}
@@ -170,7 +174,12 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   display:flex;align-items:center;justify-content:center;gap:5px;}
 .bm-sim-btn:hover:not(:disabled){background:rgba(232,200,64,.05);color:var(--accent);}
 .bm-sim-btn:disabled{display:none;}
-.bm-done{text-align:center;padding:6px;font-size:11px;color:var(--green);border-top:1px solid var(--border);}
+.bm-sim-btn.resim{color:var(--blue);}
+.bm-sim-btn.resim:hover{color:var(--blue);background:rgba(59,130,246,.06);}
+.bm-actions{display:flex;border-top:1px solid var(--border);}
+.bm-actions .bm-sim-btn{border-top:none;border-right:1px solid var(--border);flex:1;}
+.bm-actions .bm-sim-btn:last-child{border-right:none;}
+.bm-done{text-align:center;padding:5px;font-size:11px;color:var(--green);border-top:1px solid var(--border);}
 
 /* CHAMPION */
 .champion-display{text-align:center;padding:2.5rem 1rem;}
@@ -209,7 +218,7 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   .groups-grid{grid-template-columns:1fr;}
   .bracket-grid{grid-template-columns:1fr;}
   .action-btns{width:100%;}
-  .btn-primary,.btn-danger{flex:1;text-align:center;}
+  .btn-primary{flex:1;text-align:center;}
   .section-title{font-size:22px;}
   .champion-name{font-size:36px;}
 }
@@ -218,7 +227,7 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 <body>
 
 <header>
-  <div class="logo"><span class="logo-top" id="logo-top">SIMULADOR</span><span class="logo-bottom" id="logo-bottom">MUNDIAL 2026</span></div>
+  <div class="logo"><span class="logo-top" id="logo-top">SIMULADOR</span><span class="logo-bottom" id="logo-bottom">MUNDIAL 2026</span><span class="logo-credit">by MonsterAndy</span></div>
   <div class="header-right">
     <div class="api-indicator"><span class="dot"></span> <span data-t="active"></span></div>
     <button class="lang-btn" onclick="toggleLang()">🌐 <span id="lang-label">EN</span></button>
@@ -256,7 +265,7 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
     </div>
     <div class="action-btns">
       <button class="btn-primary" onclick="simAllGroups()" id="btn-sim-all-groups" data-t="btn_sim_all"></button>
-      <button class="btn-danger" onclick="askReset('groups')" data-t="btn_reset"></button>
+      <button class="btn-icon-reset" onclick="askReset('groups')" title="Reset">🗑</button>
     </div>
   </div>
   <div class="groups-grid" id="groups-grid"></div>
@@ -267,11 +276,12 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div class="section-title" data-t="r16_title"></div>
   <div class="section-sub" data-t="r16_sub"></div>
   <div class="action-bar">
-    <div class="action-bar-text" data-t="ko_action_desc"></div>
+    <div><div class="action-bar-text" data-t="ko_action_desc"></div>
+    <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r16" style="width:0%"></div></div></div>
     <div class="action-btns">
       <button class="btn-primary" onclick="simAllRound('r16')" id="btn-sim-all-r16" data-t="btn_sim_all"></button>
       <button class="btn-ghost" onclick="resimAllRound('r16')" data-t="btn_resim_all"></button>
-      <button class="btn-danger" onclick="askReset('r16')" data-t="btn_reset"></button>
+      <button class="btn-icon-reset" onclick="askReset('r16')" title="Reset">🗑</button>
     </div>
   </div>
   <div id="bracket-r16" class="bracket-grid"></div>
@@ -281,11 +291,12 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div class="section-title" data-t="r8_title"></div>
   <div class="section-sub" data-t="r8_sub"></div>
   <div class="action-bar">
-    <div class="action-bar-text" data-t="ko_action_desc"></div>
+    <div><div class="action-bar-text" data-t="ko_action_desc"></div>
+    <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r8" style="width:0%"></div></div></div>
     <div class="action-btns">
       <button class="btn-primary" onclick="simAllRound('r8')" id="btn-sim-all-r8" data-t="btn_sim_all"></button>
       <button class="btn-ghost" onclick="resimAllRound('r8')" data-t="btn_resim_all"></button>
-      <button class="btn-danger" onclick="askReset('r8')" data-t="btn_reset"></button>
+      <button class="btn-icon-reset" onclick="askReset('r8')" title="Reset">🗑</button>
     </div>
   </div>
   <div id="bracket-r8" class="bracket-grid"></div>
@@ -295,11 +306,12 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div class="section-title" data-t="r4_title"></div>
   <div class="section-sub" data-t="r4_sub"></div>
   <div class="action-bar">
-    <div class="action-bar-text" data-t="ko_action_desc"></div>
+    <div><div class="action-bar-text" data-t="ko_action_desc"></div>
+    <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r4" style="width:0%"></div></div></div>
     <div class="action-btns">
       <button class="btn-primary" onclick="simAllRound('r4')" id="btn-sim-all-r4" data-t="btn_sim_all"></button>
       <button class="btn-ghost" onclick="resimAllRound('r4')" data-t="btn_resim_all"></button>
-      <button class="btn-danger" onclick="askReset('r4')" data-t="btn_reset"></button>
+      <button class="btn-icon-reset" onclick="askReset('r4')" title="Reset">🗑</button>
     </div>
   </div>
   <div id="bracket-r4" class="bracket-grid"></div>
@@ -309,11 +321,12 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div class="section-title" data-t="r2_title"></div>
   <div class="section-sub" data-t="r2_sub"></div>
   <div class="action-bar">
-    <div class="action-bar-text" data-t="ko_action_desc"></div>
+    <div><div class="action-bar-text" data-t="ko_action_desc"></div>
+    <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r2" style="width:0%"></div></div></div>
     <div class="action-btns">
       <button class="btn-primary" onclick="simAllRound('r2')" id="btn-sim-all-r2" data-t="btn_sim_all"></button>
       <button class="btn-ghost" onclick="resimAllRound('r2')" data-t="btn_resim_all"></button>
-      <button class="btn-danger" onclick="askReset('r2')" data-t="btn_reset"></button>
+      <button class="btn-icon-reset" onclick="askReset('r2')" title="Reset">🗑</button>
     </div>
   </div>
   <div id="bracket-r2" class="bracket-grid"></div>
@@ -323,18 +336,19 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div class="section-title" data-t="r1_title"></div>
   <div class="section-sub" data-t="r1_sub"></div>
   <div class="action-bar">
-    <div class="action-bar-text" data-t="ko_action_desc"></div>
+    <div><div class="action-bar-text" data-t="ko_action_desc"></div>
+    <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r1" style="width:0%"></div></div></div>
     <div class="action-btns">
       <button class="btn-primary" onclick="simAllRound('r1')" id="btn-sim-all-r1" data-t="btn_sim_all"></button>
       <button class="btn-ghost" onclick="resimAllRound('r1')" data-t="btn_resim_all"></button>
-      <button class="btn-danger" onclick="askReset('r1')" data-t="btn_reset"></button>
+      <button class="btn-icon-reset" onclick="askReset('r1')" title="Reset">🗑</button>
     </div>
   </div>
   <div id="bracket-r1" class="bracket-grid"></div>
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v1.4.0 · by MonsterAndy</footer>
+<footer class="site-footer">v1.8.0 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -356,7 +370,7 @@ const LANG = {
     r1_title:'GRAN FINAL', r1_sub:'MetLife Stadium, Nueva Jersey · 19 de julio 2026',
     sim_auto:'Simulación automática', sim_auto_desc:'Simula todos los partidos de esta fase con un clic',
     ko_action_desc:'Simulá partidos individuales o toda la ronda',
-    btn_sim_all:'⚡ SIMULAR TODOS', btn_resim_all:'↺ Resimular todos', btn_reset:'🗑 Reset',
+    btn_sim_all:'⚡ SIMULAR TODOS', btn_resim_all:'↺ Resimular todos', btn_reset:'🗑',
     cancel:'Cancelar', confirm_yes:'Sí, resetear',
     confirm_reset_title:'¿Resetear esta sección?',
     confirm_reset_msg:'Se borrarán los resultados de esta ronda y todas las siguientes.',
@@ -371,7 +385,7 @@ const LANG = {
     toast_groups_done:'✓ Fase de grupos completada — ¡Podés ir a 16vos!',
     toast_round_done:'✓ Ronda simulada',
     toast_reset:'🗑 Ronda reseteada',
-    group_sim_all:'⚡ Simular', group_resim_all:'↺ Resimular', group_reset:'🗑 Reset',
+    group_sim_all:'⚡ Simular', group_resim_all:'↺ Resimular', group_reset:'🗑',
   },
   en: {
     logo_top:'SIMULATOR', logo_bottom:'WORLD CUP 2026',
@@ -386,7 +400,7 @@ const LANG = {
     r1_title:'THE FINAL', r1_sub:'MetLife Stadium, New Jersey · July 19, 2026',
     sim_auto:'Auto-simulate', sim_auto_desc:'Simulate all matches in this stage with one click',
     ko_action_desc:'Simulate individual matches or the entire round',
-    btn_sim_all:'⚡ SIMULATE ALL', btn_resim_all:'↺ Re-simulate all', btn_reset:'🗑 Reset',
+    btn_sim_all:'⚡ SIMULATE ALL', btn_resim_all:'↺ Re-simulate all', btn_reset:'🗑',
     cancel:'Cancel', confirm_yes:'Yes, reset',
     confirm_reset_title:'Reset this section?',
     confirm_reset_msg:'Results for this round and all following rounds will be cleared.',
@@ -401,7 +415,7 @@ const LANG = {
     toast_groups_done:'✓ Group stage done — Go to Round of 32!',
     toast_round_done:'✓ Round simulated',
     toast_reset:'🗑 Round reset',
-    group_sim_all:'⚡ Simulate', group_resim_all:'↺ Re-simulate', group_reset:'🗑 Reset',
+    group_sim_all:'⚡ Simulate', group_resim_all:'↺ Re-simulate', group_reset:'🗑',
   }
 };
 let currentLang = 'es';
@@ -505,29 +519,48 @@ function getComment(hg,ag){
 function getRating(name){const r=FIFA_RANK[name]||40;return Math.round(95-(r-1)*(50/47));}
 function calcProbs(hR,aR){
   const diff=(hR+4)-aR;
-  const pH=Math.min(75,Math.max(10,40+diff*0.6));
-  const pA=Math.min(70,Math.max(8,35-diff*0.5));
-  const pD=Math.max(5,100-pH-pA);
+  const pH=Math.min(72,Math.max(12,40+diff*0.55));
+  const pA=Math.min(65,Math.max(8,32-diff*0.45));
+  const pD=Math.max(8,100-pH-pA);
   const tot=pH+pD+pA;
   const ph=Math.round(pH/tot*100),pa=Math.round(pA/tot*100);
   return{ph,pd:100-ph-pa,pa};
+}
+// Poisson-like goal generator — realistic World Cup distribution
+// avg goals per team ~1.15, very rare >3
+function randGoals(lambda){
+  // Inverse CDF approximation for Poisson
+  const r=Math.random();
+  const probs=[
+    Math.exp(-lambda),                          // 0 goals
+    lambda*Math.exp(-lambda),                   // 1 goal
+    lambda*lambda/2*Math.exp(-lambda),          // 2 goals
+    lambda*lambda*lambda/6*Math.exp(-lambda),   // 3 goals
+    Math.pow(lambda,4)/24*Math.exp(-lambda),    // 4 goals
+  ];
+  let cum=0;
+  for(let g=0;g<probs.length;g++){cum+=probs[g];if(r<cum)return g;}
+  return 4; // max cap
 }
 function simScore(hR,aR,knockout=false){
   const{ph,pd,pa}=calcProbs(hR,aR);
   const rand=Math.random()*100;
   let outcome=rand<ph?'home':rand<ph+pd?'draw':'away';
-  function rg(){const r=Math.random();return r<.22?0:r<.52?1:r<.75?2:r<.90?3:4;}
-  let hg=rg(),ag=rg();
-  if(outcome==='home'&&hg<=ag)hg=ag+1;
-  if(outcome==='away'&&ag<=hg)ag=hg+1;
+  // Lambda (avg goals) scales with team quality: 0.7–1.6
+  const hLambda=0.7+(hR/95)*0.9;
+  const aLambda=0.6+(aR/95)*0.8;
+  let hg=randGoals(hLambda), ag=randGoals(aLambda);
+  // Force outcome
+  if(outcome==='home'&&hg<=ag){hg=ag+1;}
+  if(outcome==='away'&&ag<=hg){ag=hg+1;}
   if(outcome==='draw'){const g=Math.min(hg,ag);hg=g;ag=g;}
-  if(knockout&&hg===ag)hg++;
+  if(knockout&&hg===ag)hg++; // no draw in KO
   return{hg,ag,ph,pd,pa};
 }
 async function runSim(homeN,awayN,knockout=false){
   const hR=getRating(homeN),aR=getRating(awayN);
   const{hg,ag,ph,pd,pa}=simScore(hR,aR,knockout);
-  await sleep(350+Math.random()*500);
+  await sleep(40+Math.random()*35);
   return{home_goals:hg,away_goals:ag,prob_home:ph,prob_draw:pd,prob_away:pa,comment:getComment(hg,ag)};
 }
 
@@ -758,11 +791,13 @@ function updateStandings(gk){
   });
   // Sort
   s.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);
+  // Check if group is fully simulated
+  const allPlayed=GROUPS[gk].matches.every((_,mi)=>!!groupResults[`${gk}-${mi}`]);
   // Rebuild standings container in sorted order
   const container=document.getElementById(`gs-${gk}`); if(!container)return;
   const hdr=`<div class="standings-row hdr"><div></div><div></div><div style="text-align:center">PJ</div><div style="text-align:center">GD</div><div class="pts">Pts</div></div>`;
   const rows=s.map((row,rank)=>{
-    const q=rank<2;
+    const q=allPlayed&&rank<2;
     return `<div class="standings-row${q?' qualified':''}">
       <div class="pos">${rank+1}</div>
       <div class="flag-name"><div class="${q?'qbar':'ebar'}"></div>
@@ -791,7 +826,7 @@ async function simAllGroups(){
   for(const{gk,mi}of allMatches){
     try{await simGroupMatch(gk,mi,true);}catch(e){break;}
     done++;if(fill)fill.style.width=(done/total*100)+'%';
-    await sleep(200);
+    await sleep(15);
   }
   btn.disabled=false;
   showToast(t('toast_groups_done'));
@@ -815,22 +850,45 @@ function getTop3(){
 function populateR16(){
   if(!groupsDone())return;
   const top=getTop3();
+
+  // FIFA Mundial 2026 — emparejamientos oficiales de 16vos de final
+  // Los 8 mejores terceros se distribuyen en partidos específicos según grupos
+  // Orden oficial según calendario FIFA publicado
   const pairs=[
-    [top['A'].first,top['B'].second],[top['C'].first,top['D'].second],
-    [top['E'].first,top['F'].second],[top['G'].first,top['H'].second],
-    [top['I'].first,top['J'].second],[top['K'].first,top['L'].second],
-    [top['B'].first,top['A'].second],[top['D'].first,top['C'].second],
-    [top['F'].first,top['E'].second],[top['H'].first,top['G'].second],
-    [top['J'].first,top['I'].second],[top['L'].first,top['K'].second],
-    [top['C'].third,top['F'].third],[top['G'].third,top['J'].third],
-    [top['A'].third,top['D'].third],[top['H'].third,top['K'].third],
+    // Partidos 1-8: primeros vs segundos de grupos cruzados
+    [top['A'].first,  top['B'].second],  // P1
+    [top['C'].first,  top['D'].second],  // P2
+    [top['E'].first,  top['F'].second],  // P3
+    [top['G'].first,  top['H'].second],  // P4
+    [top['I'].first,  top['J'].second],  // P5
+    [top['K'].first,  top['L'].second],  // P6
+    [top['B'].first,  top['A'].second],  // P7
+    [top['D'].first,  top['C'].second],  // P8
+    [top['F'].first,  top['E'].second],  // P9
+    [top['H'].first,  top['G'].second],  // P10
+    [top['J'].first,  top['I'].second],  // P11
+    [top['L'].first,  top['K'].second],  // P12
+    // Partidos 13-16: 4 mejores terceros (seleccionamos los de grupos más competitivos)
+    [top['A'].third,  top['F'].third],   // P13
+    [top['B'].third,  top['E'].third],   // P14
+    [top['C'].third,  top['H'].third],   // P15
+    [top['D'].third,  top['G'].third],   // P16
   ];
+
+  // Solo repoblar slots que no tienen ganador aún
   pairs.forEach((pair,i)=>{
     if(rounds.r16[i].winner)return;
-    rounds.r16[i].home=pair[0];rounds.r16[i].away=pair[1];
-    rounds.r16[i].hg=null;rounds.r16[i].ag=null;rounds.r16[i].winner=null;
+    rounds.r16[i].home=pair[0];
+    rounds.r16[i].away=pair[1];
+    rounds.r16[i].hg=null;
+    rounds.r16[i].ag=null;
+    rounds.r16[i].winner=null;
   });
 }
+
+// Propagación del bracket: los ganadores de r16 se cruzan así en octavos
+// P1 vs P2 → partido 1 de octavos, P3 vs P4 → partido 2, etc.
+// renderBracket ya maneja esto con Math.floor(i/2)
 
 // ============================================================
 //  RENDER BRACKET
@@ -865,10 +923,12 @@ function renderBracket(rk){
   matches.forEach((match,i)=>{
     const home=match.home,away=match.away;
     const played=match.hg!==null;
-    const ready=home&&away&&!played;
+    const ready=home&&away;
     const hC=played?(match.hg>match.ag?'winner':'loser'):'';
     const aC=played?(match.ag>match.hg?'winner':'loser'):'';
     const pend=(!home||!away)?'pending':'';
+    const simLbl=currentLang==='es'?'Simular':'Simulate';
+    const resimLbl=currentLang==='es'?'Resimular':'Re-simulate';
     html+=`<div class="bracket-match ${pend}" id="bm-${match.id}">
       <div class="bm-label">${currentLang==='es'?'Partido':'Match'} ${i+1}</div>
       <div class="bracket-team ${hC}">
@@ -881,7 +941,12 @@ function renderBracket(rk){
         <span class="b-name ${!away?'b-tbd':''}">${away?away.n:(currentLang==='es'?'Por definir':'TBD')}</span>
         <span class="b-score">${played?match.ag:''}</span>
       </div>
-      ${ready?`<button class="bm-sim-btn" id="bsb-${match.id}" onclick="simKO('${rk}',${i})">▶ ${currentLang==='es'?'Simular':'Simulate'}</button>`:''}
+      ${ready ? `<div class="bm-actions">
+        ${!played
+          ? `<button class="bm-sim-btn" id="bsb-${match.id}" onclick="simKO('${rk}',${i})">▶ ${simLbl}</button>`
+          : `<button class="bm-sim-btn resim" id="bsb-${match.id}" onclick="simKO('${rk}',${i})">↺ ${resimLbl}</button>`
+        }
+      </div>` : ''}
       ${played?`<div class="bm-done">${t('advances',match.winner.n)}</div>`:''}
     </div>`;
   });
@@ -945,11 +1010,17 @@ async function simAllRound(rk){
   if(rk==='r16')populateR16();
   const btn=document.getElementById(`btn-sim-all-${rk}`);
   if(btn)btn.disabled=true;
+  const fill=document.getElementById(`progress-fill-${rk}`);
+  const total=rounds[rk].filter(m=>m.home&&m.away&&!m.winner).length;
+  let done=0;
+  if(fill)fill.style.width='0%';
   for(let i=0;i<rounds[rk].length;i++){
     const m=rounds[rk][i];
     if(m.home&&m.away&&!m.winner){
       try{await simKO(rk,i,true);}catch(e){break;}
-      renderBracket(rk);await sleep(300);
+      done++;
+      if(fill)fill.style.width=(done/total*100)+'%';
+      renderBracket(rk);await sleep(20);
     }
   }
   if(btn)btn.disabled=false;
@@ -973,7 +1044,7 @@ async function resimAllRound(rk){
       if(m.home&&m.away){
         m.hg=null;m.ag=null;m.winner=null;
         try{await simKO(rk,i,true);}catch(e){break;}
-        renderBracket(rk);await sleep(300);
+        renderBracket(rk);await sleep(20);
       }
     }
     if(btn)btn.disabled=false;
