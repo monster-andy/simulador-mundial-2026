@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v3.6.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v3.7.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -178,7 +178,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* BRACKET */
-.bracket-wrap{max-width:400px;margin:0 auto;}
+.bracket-wrap{width:100%;}
 .bracket-grid{display:flex;flex-direction:column;gap:12px;width:100%;}
 .bracket-match{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;width:100%;box-sizing:border-box;}
 .bracket-match.pending{opacity:.45;}
@@ -249,6 +249,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
 @media(max-width:640px){
   main{padding:.75rem;}
   .groups-grid{grid-template-columns:1fr;}
+  .bracket-wrap{max-width:400px;margin:0 auto;}
   .action-btns{width:100%;}
   .btn-primary{flex:1;text-align:center;}
   .section-title{font-size:22px;}
@@ -404,7 +405,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v3.6.0 · by MonsterAndy</footer>
+<footer class="site-footer">v3.7.0 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
