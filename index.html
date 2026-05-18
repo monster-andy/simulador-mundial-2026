@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v4.5.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v4.5.1 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -428,7 +428,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v4.5.0 · by MonsterAndy</footer>
+<footer class="site-footer">v4.5.1 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -696,12 +696,13 @@ function getRating(name){const r=FIFA_RANK[name]||40;return Math.round(95-(r-1)*
 
 function calcProbs(hR,aR,homeN,awayN,knockout=false){
   const h2h=getH2H(homeN,awayN);
-  const homeAdv=knockout?2:4;
+  // Grupos: pequeña ventaja de local. KO: sede neutral, sin ventaja
+  const homeAdv=knockout?0:4;
   const diff=(hR+homeAdv)-aR+h2h;
-  // Aumentamos el peso del diff significativamente para que el ranking importe más
-  // diff=0 → 40/30/30, diff=+48 (máximo posible) → ~82/10/8
-  const pH=Math.min(85,Math.max(8, 40+diff*0.85));
-  const pA=Math.min(75,Math.max(5, 30-diff*0.70));
+  // En KO el rating pesa aún más (menos margen para sorpresas en cuartos/semis/final)
+  const mult=knockout?1.05:0.85;
+  const pH=Math.min(88,Math.max(8,  40+diff*mult));
+  const pA=Math.min(78,Math.max(4,  30-diff*(mult*0.82)));
   const pD=knockout?Math.max(3,100-pH-pA):Math.max(6,100-pH-pA);
   const tot=pH+pD+pA;
   const ph=Math.round(pH/tot*100),pa=Math.round(pA/tot*100);
