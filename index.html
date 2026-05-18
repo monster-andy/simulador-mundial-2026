@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v4.4.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v4.5.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -428,7 +428,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v4.4.0 · by MonsterAndy</footer>
+<footer class="site-footer">v4.5.0 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -698,9 +698,11 @@ function calcProbs(hR,aR,homeN,awayN,knockout=false){
   const h2h=getH2H(homeN,awayN);
   const homeAdv=knockout?2:4;
   const diff=(hR+homeAdv)-aR+h2h;
-  const pH=Math.min(72,Math.max(12,40+diff*0.55));
-  const pA=Math.min(65,Math.max(8,32-diff*0.45));
-  const pD=knockout?Math.max(5,100-pH-pA):Math.max(8,100-pH-pA);
+  // Aumentamos el peso del diff significativamente para que el ranking importe más
+  // diff=0 → 40/30/30, diff=+48 (máximo posible) → ~82/10/8
+  const pH=Math.min(85,Math.max(8, 40+diff*0.85));
+  const pA=Math.min(75,Math.max(5, 30-diff*0.70));
+  const pD=knockout?Math.max(3,100-pH-pA):Math.max(6,100-pH-pA);
   const tot=pH+pD+pA;
   const ph=Math.round(pH/tot*100),pa=Math.round(pA/tot*100);
   return{ph,pd:100-ph-pa,pa};
@@ -726,11 +728,20 @@ function simScore(hR,aR,homeN,awayN,knockout=false){
   let outcome=rand<ph?'home':rand<ph+pd?'draw':'away';
   const hSt=getStyle(homeN),aSt=getStyle(awayN);
   const koFactor=knockout?0.82:1.0;
-  const hLambda=Math.max(0.4,(0.7+(hR/95)*0.9+hSt.attack-aSt.defend+(knockout?hSt.pressure:0))*koFactor);
-  const aLambda=Math.max(0.4,(0.6+(aR/95)*0.8+aSt.attack-hSt.defend+(knockout?aSt.pressure:0))*koFactor);
+
+  // Lambda reflects actual quality gap — better teams score more AND concede less
+  const hLambda=Math.max(0.3,(0.6+(hR/95)*1.1+hSt.attack-aSt.defend+(knockout?hSt.pressure:0))*koFactor);
+  const aLambda=Math.max(0.3,(0.45+(aR/95)*0.9+aSt.attack-hSt.defend+(knockout?aSt.pressure:0))*koFactor);
+
   let hg=randGoals(hLambda),ag=randGoals(aLambda);
+
+  // Force outcome — but cap upset wins to 1 goal margin (upsets are always tight)
   if(outcome==='home'&&hg<=ag){hg=ag+1;}
-  if(outcome==='away'&&ag<=hg){ag=hg+1;}
+  if(outcome==='away'&&ag<=hg){
+    ag=hg+1;
+    // Upsets are always 1-goal wins (1-0, 1-2, etc), never big margins
+    if(ag-hg>1){hg=ag-1;}
+  }
   if(outcome==='draw'){const g=Math.min(hg,ag);hg=g;ag=g;}
   if(knockout&&hg===ag)hg++;
   return{hg,ag,ph,pd,pa};
