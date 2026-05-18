@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v4.5.1 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v4.6.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -280,7 +280,10 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
   </div>
   <div class="header-right">
     <div class="api-indicator"><span class="dot"></span> <span data-t="active"></span></div>
-    <button class="lang-btn" onclick="toggleLang()">🌐 <span id="lang-label">EN</span></button>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+      <button class="lang-btn" onclick="toggleLang()">🌐 <span id="lang-label">EN</span></button>
+      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v4.6.0</span>
+    </div>
   </div>
   <!-- Desktop: single nav row -->
   <nav class="nav-tabs nav-desktop" id="nav-tabs">
@@ -428,7 +431,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v4.5.1 · by MonsterAndy</footer>
+<footer class="site-footer">v4.6.0 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
