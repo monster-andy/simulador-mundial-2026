@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v4.2.6 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v4.2.7 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -428,7 +428,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v4.2.6 · by MonsterAndy</footer>
+<footer class="site-footer">v4.2.7 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -661,10 +661,10 @@ function simScore(hR,aR,knockout=false){
   if(knockout&&hg===ag)hg++; // no draw in KO
   return{hg,ag,ph,pd,pa};
 }
-async function runSim(homeN,awayN,knockout=false){
+async function runSim(homeN,awayN,knockout=false,fast=false){
   const hR=getRating(homeN),aR=getRating(awayN);
   const{hg,ag,ph,pd,pa}=simScore(hR,aR,knockout);
-  await sleep(10+Math.random()*8);
+  await sleep(fast ? 5+Math.random()*4 : 10+Math.random()*8);
   return{home_goals:hg,away_goals:ag,prob_home:ph,prob_draw:pd,prob_away:pa,comment:getComment(hg,ag)};
 }
 
@@ -903,7 +903,7 @@ async function simGroupMatch(gk,mi,silent=false){
   const btn=document.getElementById(`bs-${key}`);
   if(btn){btn.disabled=true;btn.innerHTML=`<span class="spinner-sm"></span> ${t('simming')}`;}
   try{
-    const r=await runSim(home.n,away.n,false);
+    const r=await runSim(home.n,away.n,false,true);
     groupResults[key]={hg:r.home_goals,ag:r.away_goals,ph:r.prob_home,pd:r.prob_draw,pa:r.prob_away,comment:r.comment};
     const hEl=document.getElementById(`sd-${key}-h`),aEl=document.getElementById(`sd-${key}-a`);
     if(hEl)hEl.textContent=r.home_goals; if(aEl)aEl.textContent=r.away_goals;
@@ -1005,7 +1005,7 @@ async function simAllGroups(){
   for(const{gk,mi}of allMatches){
     try{await simGroupMatch(gk,mi,true);}catch(e){break;}
     done++;if(fill)fill.style.width=(done/total*100)+'%';
-    await sleep(4);
+    await sleep(2);
   }
   btn.disabled=false;
   showToast(t('toast_groups_done'));
