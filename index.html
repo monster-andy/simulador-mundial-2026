@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v2.4.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v2.8.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -27,10 +27,15 @@ header{
   position:sticky;top:0;z-index:100;
   background:rgba(10,14,26,.96); backdrop-filter:blur(12px);
 }
-.logo{font-family:'Bebas Neue',sans-serif;line-height:1.05;white-space:nowrap;display:inline-flex;flex-direction:column;}
-.logo-top{font-size:22px;color:var(--text);display:block;letter-spacing:5.5px;}
-.logo-bottom{font-size:38px;color:var(--accent);display:block;letter-spacing:3px;}
-.logo-credit{font-size:9px;color:rgba(255,255,255,.25);letter-spacing:2px;margin-top:1px;display:block;font-family:'DM Sans',sans-serif;}
+.logo{font-family:'Bebas Neue',sans-serif;white-space:nowrap;display:inline-flex;flex-direction:row;align-items:center;gap:5px;}
+.logo-left{display:flex;flex-direction:column;justify-content:center;gap:0;}
+/* line2 = MUNDIAL / WORLD CUP: reference, 18px. Both langs normalised to same px width via JS */
+.logo-line2{font-size:18px;color:var(--text);display:block;line-height:1.1;letter-spacing:5px;}
+/* line1 = SIMULADOR / SIMULATOR: smaller, stretches to match line2 width via JS */
+.logo-line1{font-size:11px;color:rgba(255,255,255,.6);display:block;line-height:1.25;letter-spacing:3px;}
+/* line3 = 2026: exactly 2× line2 = 36px, fills full height of left column */
+.logo-line3{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);line-height:1;display:flex;align-items:center;letter-spacing:-0.5px;}
+.logo-credit{font-size:8px;color:rgba(255,255,255,.2);letter-spacing:1px;margin-top:1px;display:block;font-family:'DM Sans',sans-serif;}
 .header-right{display:flex;align-items:center;gap:10px;justify-content:flex-end;}
 .api-indicator{font-size:11px;color:var(--green);display:flex;align-items:center;gap:5px;white-space:nowrap;}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
@@ -62,18 +67,22 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 .action-bar{
   background:var(--surface);border:1px solid var(--border);border-radius:10px;
   padding:12px 16px;margin-bottom:1.25rem;
-  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  display:flex;align-items:flex-start;gap:10px;
 }
-.action-bar-text{font-size:13px;color:var(--muted);}
+.action-bar-left{display:flex;flex-direction:column;gap:6px;}
+.action-bar-text{font-size:12px;color:var(--muted);margin-bottom:2px;}
 .action-bar-text strong{color:var(--text);}
-.action-btns{display:flex;gap:8px;flex-wrap:wrap;}
-.progress-wrap{height:3px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden;width:180px;}
+.action-btns{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;}
+/* Wraps only the primary sim button + its progress bar */
+.sim-primary-wrap{display:flex;flex-direction:column;gap:4px;}
+.progress-wrap{height:3px;background:var(--border);border-radius:2px;overflow:hidden;width:100%;}
 .progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
 
 /* BUTTONS */
 .btn-primary{padding:8px 18px;background:var(--accent);color:#0a0e1a;border:none;border-radius:7px;
   font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
 .btn-primary:hover{opacity:.85;} .btn-primary:disabled{opacity:.35;cursor:not-allowed;}
+.btn-row-inline{display:flex;align-items:center;gap:6px;}
 .btn-icon-reset{width:32px;height:32px;padding:0;background:transparent;color:var(--muted);
   border:none;border-radius:7px;cursor:pointer;transition:all .2s;
   display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
@@ -162,9 +171,9 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 .bracket-match{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
 .bracket-match.pending{opacity:.45;}
 .bm-label{font-size:10px;color:var(--muted);padding:6px 10px 0;text-transform:uppercase;letter-spacing:.5px;}
-.bracket-team{display:flex;align-items:center;gap:8px;padding:9px 10px;font-size:13px;border-bottom:1px solid var(--border);}
+.bracket-team{display:flex;align-items:center;gap:8px;padding:9px 10px;font-size:13px;border-bottom:1px solid var(--border);border-left:3px solid transparent;}
 .bracket-team:last-child{border-bottom:none;}
-.bracket-team.winner{background:rgba(232,200,64,.08);color:var(--accent);font-weight:600;}
+.bracket-team.winner{border-left-color:var(--accent);color:var(--accent);font-weight:600;}
 .bracket-team.loser{color:var(--muted);}
 .b-flag{font-size:17px;} .b-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .b-score{font-family:'Bebas Neue',sans-serif;font-size:17px;min-width:16px;text-align:right;}
@@ -227,7 +236,7 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 
 @media(max-width:640px){
   header{grid-template-columns:1fr auto;grid-template-rows:auto auto;}
-  .logo-top{font-size:11px;} .logo-bottom{font-size:17px;}
+  .logo-line1{font-size:8px;} .logo-line2{font-size:11px;} .logo-line3{font-size:22px;}
   .nav-tabs{grid-column:1/-1;order:3;}
   .header-right{order:2;}
   main{padding:.75rem;}
@@ -243,7 +252,14 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 <body>
 
 <header>
-  <div class="logo"><span class="logo-top" id="logo-top">SIMULADOR</span><span class="logo-bottom" id="logo-bottom">MUNDIAL 2026</span><span class="logo-credit">by MonsterAndy</span></div>
+  <div class="logo">
+    <div class="logo-left">
+      <span class="logo-line1" id="logo-line1">SIMULADOR</span>
+      <span class="logo-line2" id="logo-line2">MUNDIAL</span>
+      <span class="logo-credit">by MonsterAndy</span>
+    </div>
+    <span class="logo-line3" id="logo-line3">2026</span>
+  </div>
   <div class="header-right">
     <div class="api-indicator"><span class="dot"></span> <span data-t="active"></span></div>
     <button class="lang-btn" onclick="toggleLang()">🌐 <span id="lang-label">EN</span></button>
@@ -275,13 +291,14 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div class="section-title" data-t="groups_title"></div>
   <div class="section-sub" data-t="groups_sub"></div>
   <div class="action-bar">
-    <div>
-      <div class="action-bar-text"><strong data-t="sim_auto"></strong> — <span data-t="sim_auto_desc"></span></div>
-      <div class="progress-wrap"><div class="progress-fill" id="progress-fill-grupos" style="width:0%"></div></div>
-    </div>
-    <div class="action-btns">
-      <button class="btn-primary" onclick="simAllGroups()" id="btn-sim-all-groups" data-t="btn_sim_all"></button>
-      <button class="btn-icon-reset" onclick="askReset('groups')" title="Reset">🗑</button>
+    <div class="action-bar-left">
+      <div class="action-btns">
+        <div class="sim-primary-wrap">
+          <button class="btn-primary" onclick="simAllGroups()" id="btn-sim-all-groups" data-t="btn_sim_all"></button>
+          <div class="progress-wrap"><div class="progress-fill" id="progress-fill-grupos" style="width:0%"></div></div>
+        </div>
+        <button class="btn-icon-reset" onclick="askReset('groups')" title="Reset">🗑</button>
+      </div>
     </div>
   </div>
   <div class="groups-grid" id="groups-grid"></div>
@@ -292,12 +309,16 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div class="section-title" data-t="r16_title"></div>
   <div class="section-sub" data-t="r16_sub"></div>
   <div class="action-bar">
-    <div><div class="action-bar-text" data-t="ko_action_desc"></div>
-    <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r16" style="width:0%"></div></div></div>
-    <div class="action-btns">
-      <button class="btn-primary" onclick="simAllRound('r16')" id="btn-sim-all-r16" data-t="btn_sim_all"></button>
-      <button class="btn-ghost" onclick="resimAllRound('r16')" data-t="btn_resim_all"></button>
-      <button class="btn-icon-reset" onclick="askReset('r16')" title="Reset">🗑</button>
+    <div class="action-bar-left">
+      <div class="action-bar-text" data-t="ko_action_desc"></div>
+      <div class="action-btns">
+        <div class="sim-primary-wrap">
+          <button class="btn-primary" onclick="simAllRound('r16')" id="btn-sim-all-r16" data-t="btn_sim_all"></button>
+          <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r16" style="width:0%"></div></div>
+        </div>
+        <button class="btn-ghost" onclick="resimAllRound('r16')" data-t="btn_resim_all"></button>
+        <button class="btn-icon-reset" onclick="askReset('r16')" title="Reset">🗑</button>
+      </div>
     </div>
   </div>
   <div id="bracket-r16" class="bracket-grid"></div>
@@ -307,12 +328,16 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div class="section-title" data-t="r8_title"></div>
   <div class="section-sub" data-t="r8_sub"></div>
   <div class="action-bar">
-    <div><div class="action-bar-text" data-t="ko_action_desc"></div>
-    <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r8" style="width:0%"></div></div></div>
-    <div class="action-btns">
-      <button class="btn-primary" onclick="simAllRound('r8')" id="btn-sim-all-r8" data-t="btn_sim_all"></button>
-      <button class="btn-ghost" onclick="resimAllRound('r8')" data-t="btn_resim_all"></button>
-      <button class="btn-icon-reset" onclick="askReset('r8')" title="Reset">🗑</button>
+    <div class="action-bar-left">
+      <div class="action-bar-text" data-t="ko_action_desc"></div>
+      <div class="action-btns">
+        <div class="sim-primary-wrap">
+          <button class="btn-primary" onclick="simAllRound('r8')" id="btn-sim-all-r8" data-t="btn_sim_all"></button>
+          <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r8" style="width:0%"></div></div>
+        </div>
+        <button class="btn-ghost" onclick="resimAllRound('r8')" data-t="btn_resim_all"></button>
+        <button class="btn-icon-reset" onclick="askReset('r8')" title="Reset">🗑</button>
+      </div>
     </div>
   </div>
   <div id="bracket-r8" class="bracket-grid"></div>
@@ -322,12 +347,16 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div class="section-title" data-t="r4_title"></div>
   <div class="section-sub" data-t="r4_sub"></div>
   <div class="action-bar">
-    <div><div class="action-bar-text" data-t="ko_action_desc"></div>
-    <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r4" style="width:0%"></div></div></div>
-    <div class="action-btns">
-      <button class="btn-primary" onclick="simAllRound('r4')" id="btn-sim-all-r4" data-t="btn_sim_all"></button>
-      <button class="btn-ghost" onclick="resimAllRound('r4')" data-t="btn_resim_all"></button>
-      <button class="btn-icon-reset" onclick="askReset('r4')" title="Reset">🗑</button>
+    <div class="action-bar-left">
+      <div class="action-bar-text" data-t="ko_action_desc"></div>
+      <div class="action-btns">
+        <div class="sim-primary-wrap">
+          <button class="btn-primary" onclick="simAllRound('r4')" id="btn-sim-all-r4" data-t="btn_sim_all"></button>
+          <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r4" style="width:0%"></div></div>
+        </div>
+        <button class="btn-ghost" onclick="resimAllRound('r4')" data-t="btn_resim_all"></button>
+        <button class="btn-icon-reset" onclick="askReset('r4')" title="Reset">🗑</button>
+      </div>
     </div>
   </div>
   <div id="bracket-r4" class="bracket-grid"></div>
@@ -337,12 +366,16 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div class="section-title" data-t="r2_title"></div>
   <div class="section-sub" data-t="r2_sub"></div>
   <div class="action-bar">
-    <div><div class="action-bar-text" data-t="ko_action_desc"></div>
-    <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r2" style="width:0%"></div></div></div>
-    <div class="action-btns">
-      <button class="btn-primary" onclick="simAllRound('r2')" id="btn-sim-all-r2" data-t="btn_sim_all"></button>
-      <button class="btn-ghost" onclick="resimAllRound('r2')" data-t="btn_resim_all"></button>
-      <button class="btn-icon-reset" onclick="askReset('r2')" title="Reset">🗑</button>
+    <div class="action-bar-left">
+      <div class="action-bar-text" data-t="ko_action_desc"></div>
+      <div class="action-btns">
+        <div class="sim-primary-wrap">
+          <button class="btn-primary" onclick="simAllRound('r2')" id="btn-sim-all-r2" data-t="btn_sim_all"></button>
+          <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r2" style="width:0%"></div></div>
+        </div>
+        <button class="btn-ghost" onclick="resimAllRound('r2')" data-t="btn_resim_all"></button>
+        <button class="btn-icon-reset" onclick="askReset('r2')" title="Reset">🗑</button>
+      </div>
     </div>
   </div>
   <div id="bracket-r2" class="bracket-grid"></div>
@@ -352,19 +385,23 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div class="section-title" data-t="r1_title"></div>
   <div class="section-sub" data-t="r1_sub"></div>
   <div class="action-bar">
-    <div><div class="action-bar-text" data-t="ko_action_desc"></div>
-    <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r1" style="width:0%"></div></div></div>
-    <div class="action-btns">
-      <button class="btn-primary" onclick="simAllRound('r1')" id="btn-sim-all-r1" data-t="btn_sim_all"></button>
-      <button class="btn-ghost" onclick="resimAllRound('r1')" data-t="btn_resim_all"></button>
-      <button class="btn-icon-reset" onclick="askReset('r1')" title="Reset">🗑</button>
+    <div class="action-bar-left">
+      <div class="action-bar-text" data-t="ko_action_desc"></div>
+      <div class="action-btns">
+        <div class="sim-primary-wrap">
+          <button class="btn-primary" onclick="simAllRound('r1')" id="btn-sim-all-r1" data-t="btn_sim_all"></button>
+          <div class="progress-wrap"><div class="progress-fill" id="progress-fill-r1" style="width:0%"></div></div>
+        </div>
+        <button class="btn-ghost" onclick="resimAllRound('r1')" data-t="btn_resim_all"></button>
+        <button class="btn-icon-reset" onclick="askReset('r1')" title="Reset">🗑</button>
+      </div>
     </div>
   </div>
   <div id="bracket-r1" class="bracket-grid"></div>
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v2.4.0 · by MonsterAndy</footer>
+<footer class="site-footer">v2.8.0 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -374,7 +411,7 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 // ============================================================
 const LANG = {
   es: {
-    logo_top:'SIMULADOR', logo_bottom:'MUNDIAL 2026',
+    logo_line1:'SIMULADOR', logo_line2:'MUNDIAL', logo_line3:'2026',
     active:'Simulador activo', nav_groups:'Grupos', nav_r16:'16vos', nav_r8:'Octavos',
     nav_r4:'Cuartos', nav_r2:'Semis', nav_r1:'Final',
     group_singular:'GRUPO',
@@ -404,7 +441,7 @@ const LANG = {
     group_sim_all:'⚡ Simular', group_resim_all:'↺ Resimular', group_reset:'🗑',
   },
   en: {
-    logo_top:'SIMULATOR', logo_bottom:'WORLD CUP 2026',
+    logo_line1:'SIMULATOR', logo_line2:'WORLD CUP', logo_line3:'2026',
     active:'Simulator active', nav_groups:'Groups', nav_r16:'Round of 32', nav_r8:'Round of 16',
     nav_r4:'Quarter-finals', nav_r2:'Semi-finals', nav_r1:'Final',
     group_singular:'GROUP',
@@ -443,14 +480,35 @@ function applyLang() {
   document.documentElement.lang = currentLang;
   document.getElementById('page-title').textContent = currentLang === 'es' ? 'Simulador Mundial 2026' : '2026 World Cup Simulator';
   document.getElementById('lang-label').textContent = currentLang === 'es' ? 'EN' : 'ES';
-  const lt=document.getElementById('logo-top'), lb=document.getElementById('logo-bottom');
-  if(lt) lt.textContent=t('logo_top');
-  if(lb) lb.textContent=t('logo_bottom');
+  const l1=document.getElementById('logo-line1'),l2=document.getElementById('logo-line2');
+  if(l1) l1.textContent=t('logo_line1');
+  if(l2) l2.textContent=t('logo_line2');
   requestAnimationFrame(()=>{
-    if(lt&&lb){
-      const diff=lb.offsetWidth-lt.offsetWidth;
-      const chars=lt.textContent.length;
-      if(chars>1) lt.style.letterSpacing=((diff/chars)+5.5)+'px';
+    if(!l1||!l2) return;
+    // Step 1: reset any previous adjustments
+    l1.style.letterSpacing=''; l2.style.letterSpacing='';
+    // Step 2: MUNDIAL (ES) is shorter than WORLD CUP (EN) naturally.
+    // We want both languages to produce the SAME pixel width for line2.
+    // Measure natural width of both language strings at current font settings.
+    // Since we're already in one language, we use a hidden span to measure the other.
+    const probe=document.createElement('span');
+    probe.style.cssText='position:absolute;visibility:hidden;font-family:"Bebas Neue",sans-serif;font-size:16px;letter-spacing:4.5px;white-space:nowrap;';
+    probe.textContent='WORLD CUP'; // always the wider string
+    document.body.appendChild(probe);
+    const targetW=probe.offsetWidth; // WORLD CUP width is the reference
+    document.body.removeChild(probe);
+    // Step 3: stretch line2 (MUNDIAL or WORLD CUP) to targetW
+    const w2=l2.offsetWidth;
+    if(w2<targetW && l2.textContent.length>1){
+      const extra=(targetW-w2)/(l2.textContent.length-1);
+      l2.style.letterSpacing=(4.5+extra)+'px';
+    }
+    // Step 4: stretch line1 (SIMULADOR/SIMULATOR) to match line2's final width
+    const finalW2=l2.offsetWidth;
+    const w1=l1.offsetWidth;
+    if(w1!==finalW2 && l1.textContent.length>1){
+      const extra2=(finalW2-w1)/(l1.textContent.length-1);
+      l1.style.letterSpacing=Math.max(0,3+extra2)+'px';
     }
   });
   document.querySelectorAll('[data-t]').forEach(el => {
@@ -644,6 +702,8 @@ function doReset(section){
     buildGroupsUI();
   } else {
     resetRoundsFrom(section);
+    // Repopulate current section with teams from previous round
+    if(section==='r16' && groupsDone()) populateR16();
     renderBracket(section);
   }
   showToast(t('toast_reset'));
@@ -968,16 +1028,15 @@ function updateRoundButtonState(rk){
   if(!btn) return;
   const matches=rounds[rk];
   const hasPending=matches.some(m=>m.home&&m.away&&!m.winner);
-  const hasAny=matches.some(m=>m.winner);
-  if(hasPending&&hasAny){
+  const hasDone=matches.some(m=>m.winner);
+  // Orange "continue" only when MIXED: some done AND some pending (changed state)
+  if(hasPending&&hasDone){
     btn.classList.add('has-pending');
-    btn.textContent='⚠ '+t('btn_continue');
-  } else if(hasPending){
-    btn.classList.remove('has-pending');
-    btn.textContent=t('btn_sim_all');
+    btn.innerHTML='⚠ '+t('btn_continue');
   } else {
     btn.classList.remove('has-pending');
-    btn.textContent=t('btn_sim_all');
+    btn.setAttribute('data-t','btn_sim_all');
+    btn.innerHTML=t('btn_sim_all');
   }
 }
 function prevRoundKey(rk){return{r16:null,r8:'r16',r4:'r8',r2:'r4',r1:'r2'}[rk];}
@@ -1155,7 +1214,8 @@ async function simAllRound(rk){
       renderBracket(rk);await sleep(10);
     }
   }
-  if(btn)btn.disabled=false;
+  if(btn){btn.disabled=false;}
+  updateRoundButtonState(rk);
   showToast(t('toast_round_done'));
 }
 
