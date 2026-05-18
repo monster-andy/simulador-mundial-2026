@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v4.2.7 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v4.2.8 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -428,7 +428,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v4.2.7 · by MonsterAndy</footer>
+<footer class="site-footer">v4.2.8 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -456,8 +456,10 @@ const LANG = {
     confirm_reset_msg:'Se borrarán los resultados de esta ronda y todas las siguientes.',
     confirm_resim_title:'¿Resimular todos los partidos?',
     confirm_resim_msg:'Se volverán a calcular todos los resultados y se resetearán las rondas siguientes.',
-    pending_title:'Fase anterior pendiente', pending_desc:'Primero simulá todos los partidos de la fase anterior. Los clasificados aparecerán aquí automáticamente.',
-    go_groups:'← Ir a Grupos', go_prev:'← Ronda anterior',
+    pending_title_one:'Fase anterior pendiente', pending_title_many:'Fases anteriores pendientes',
+    pending_desc_one:'Primero simulá todos los partidos de la fase anterior para continuar.',
+    pending_desc_many:'Hay varias fases pendientes. Empezá por la primera que falta.',
+    go_groups:'← Ir a Grupos', go_prev:'← Ir a', pending_title:'Fase anterior pendiente', pending_desc:'Primero simulá todos los partidos de la fase anterior.',
     champion:'¡Campeón del Mundo 2026!',
     winner_label: (n) => `✓ ${n} gana`, draw_label:'⚖ Empate',
     advances: (n) => `✓ ${n} avanza`,
@@ -486,8 +488,10 @@ const LANG = {
     confirm_reset_msg:'Results for this round and all following rounds will be cleared.',
     confirm_resim_title:'Re-simulate all matches?',
     confirm_resim_msg:'All results will be recalculated and following rounds will be reset.',
-    pending_title:'Previous stage pending', pending_desc:'First simulate all matches in the previous stage. Qualified teams will appear here automatically.',
-    go_groups:'← Go to Groups', go_prev:'← Previous round',
+    pending_title_one:'Previous stage pending', pending_title_many:'Previous stages pending',
+    pending_desc_one:'First simulate all matches in the previous stage to continue.',
+    pending_desc_many:'Several stages are pending. Start with the first one missing.',
+    go_groups:'← Go to Groups', go_prev:'← Go to', pending_title:'Previous stage pending', pending_desc:'First simulate all matches in the previous stage.',
     champion:'World Champion 2026!',
     winner_label: (n) => `✓ ${n} wins`, draw_label:'⚖ Draw',
     advances: (n) => `✓ ${n} advances`,
@@ -1192,7 +1196,12 @@ function renderBracket(rk){
 
   // For r16: if groups not done, show pending
   if(rk==='r16'&&!groupsDone()){
-    container.innerHTML=pendingHtml(t('pending_title'),t('pending_desc'),'grupos',t('go_groups'));
+    container.innerHTML=pendingHtml(
+      t('pending_title_one'),
+      t('pending_desc_one'),
+      'grupos',
+      t('go_groups')
+    );
     return;
   }
 
@@ -1209,8 +1218,18 @@ function renderBracket(rk){
   // For r8+: if previous round has no winners at all, show pending pointing to first incomplete
   if(prev&&rounds[prev].every(m=>!m.winner)){
     const target=firstPendingRound(rk);
-    const lbl=target==='grupos'?t('go_groups'):t('go_prev');
-    container.innerHTML=pendingHtml(t('pending_title'),t('pending_desc'),target,lbl);
+    // Count how many rounds are pending before this one
+    const order=['grupos','r16','r8','r4','r2'];
+    const rkIdx=order.indexOf(rk);
+    const targetIdx=order.indexOf(target);
+    const pendingCount=rkIdx-targetIdx;
+    const isMany=pendingCount>1;
+    const title=isMany?t('pending_title_many'):t('pending_title_one');
+    const desc=isMany?t('pending_desc_many'):t('pending_desc_one');
+    // Button label: "← Ir a Grupos" or "← Ir a 16vos" etc
+    const roundNames={grupos:t('nav_groups'),r16:t('nav_r16'),r8:t('nav_r8'),r4:t('nav_r4'),r2:t('nav_r2'),r1:t('nav_r1')};
+    const btnLbl=target==='grupos'?t('go_groups'):`${t('go_prev')} ${roundNames[target]}`;
+    container.innerHTML=pendingHtml(title,desc,target,btnLbl);
     return;
   }
 
