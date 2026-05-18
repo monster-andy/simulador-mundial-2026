@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v4.2.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v4.2.2 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -428,7 +428,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v4.2.0 · by MonsterAndy</footer>
+<footer class="site-footer">v4.2.2 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -730,11 +730,12 @@ function doReset(section){
     resetRoundsFrom('r16');
     document.getElementById('progress-fill-grupos').style.width='0%';
     buildGroupsUI();
+    updateGroupsButtonState();
   } else {
     resetRoundsFrom(section);
-    // Repopulate current section with teams from previous round
     if(section==='r16' && groupsDone()) populateR16();
     renderBracket(section);
+    ['r16','r8','r4','r2','r1'].forEach(rk=>updateRoundButtonState(rk));
   }
   showToast(t('toast_reset'));
 }
@@ -930,6 +931,7 @@ function resetGroup(gk){
     GROUPS[gk].matches.forEach((_,mi)=>delete groupResults[`${gk}-${mi}`]);
     resetRoundsFrom('r16');
     buildGroupsUI();
+    updateGroupsButtonState();
     showToast(t('toast_reset'));
   });
 }
@@ -998,15 +1000,28 @@ async function simAllGroups(){
 function updateGroupsButtonState(){
   const btn=document.getElementById('btn-sim-all-groups');
   if(!btn) return;
-  if(groupsDone()){
+  const totalMatches=Object.values(GROUPS).reduce((a,g)=>a+g.matches.length,0);
+  const doneMatches=Object.keys(groupResults).length;
+  const allDone=groupsDone();
+  const someDone=doneMatches>0;
+
+  if(allDone){
+    // All groups done → green next phase
     btn.classList.add('has-next');
     btn.classList.remove('has-pending');
     btn.innerHTML=t('btn_next');
     btn.onclick=()=>showSection('r16');
+  } else if(someDone){
+    // Some done, some pending → orange continue
+    btn.classList.remove('has-next');
+    btn.classList.add('has-pending');
+    btn.innerHTML='⚠ '+t('btn_continue');
+    btn.onclick=()=>simAllGroups();
   } else {
+    // Nothing done → yellow simulate all
     btn.classList.remove('has-next','has-pending');
     btn.innerHTML=t('btn_sim_all');
-    btn.onclick=null; // uses original HTML onclick
+    btn.onclick=()=>simAllGroups();
   }
 }
 
