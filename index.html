@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v4.7.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v4.7.2 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -282,7 +282,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
     <div class="api-indicator"><span class="dot"></span> <span data-t="active"></span></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
       <button class="lang-btn" onclick="toggleLang()">🌐 <span id="lang-label">EN</span></button>
-      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v4.7.0</span>
+      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v4.7.2</span>
     </div>
   </div>
   <!-- Desktop: single nav row -->
@@ -431,7 +431,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v4.7.0 · by MonsterAndy</footer>
+<footer class="site-footer">v4.7.2 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -736,10 +736,13 @@ function calcProbs(hR,aR,homeN,awayN,knockout=false){
   const h2h=getH2H(homeN,awayN);
   const homeAdv=knockout?0:4;
   const diff=(hR+homeAdv)-aR+h2h;
-  const mult=knockout?1.05:0.85;
-  const pH=Math.min(88,Math.max(8,  40+diff*mult));
-  const pA=Math.min(78,Math.max(4,  30-diff*(mult*0.82)));
-  const pD=knockout?Math.max(3,100-pH-pA):Math.max(6,100-pH-pA);
+  // Bigger gap → multiplier grows → top teams dominate weak teams more
+  const baseMult=knockout?1.10:0.90;
+  const gapBoost=Math.max(0,(Math.abs(diff)-15)/80);
+  const mult=baseMult+gapBoost;
+  const pH=Math.min(93,Math.max(8,  40+diff*mult));
+  const pA=Math.min(78,Math.max(3,  30-diff*(mult*0.80)));
+  const pD=knockout?Math.max(3,100-pH-pA):Math.max(4,100-pH-pA);
   const tot=pH+pD+pA;
   const ph=Math.round(pH/tot*100),pa=Math.round(pA/tot*100);
   return{ph,pd:100-ph-pa,pa};
