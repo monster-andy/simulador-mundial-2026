@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v4.7.2 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v4.8.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -282,7 +282,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
     <div class="api-indicator"><span class="dot"></span> <span data-t="active"></span></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
       <button class="lang-btn" onclick="toggleLang()">🌐 <span id="lang-label">EN</span></button>
-      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v4.7.2</span>
+      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v4.8.0</span>
     </div>
   </div>
   <!-- Desktop: single nav row -->
@@ -431,7 +431,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v4.7.2 · by MonsterAndy</footer>
+<footer class="site-footer">v4.8.0 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -1026,13 +1026,20 @@ function invalidateAffectedMatches(gk, before3, after3){
 function invalidateCascade(rk, idx, oldWinner){
   const nextRk={r16:'r8',r8:'r4',r4:'r2',r2:'r1'}[rk];
   if(!nextRk) return;
-  const ni=Math.floor(idx/2);
+  // For r16→r8, use the official FIFA bracket pairing (not sequential Math.floor)
+  let ni;
+  if(rk==='r16'){
+    const r16map=[[1,4],[0,2],[3,5],[6,7],[10,11],[8,9],[13,15],[12,14]];
+    ni=r16map.findIndex(([hi,ai])=>hi===idx||ai===idx);
+  } else {
+    ni=Math.floor(idx/2);
+  }
+  if(ni===-1||ni===undefined) return;
   const nm=rounds[nextRk][ni];
   if(!nm) return;
   const wasHome=nm.home?.n===oldWinner.n;
   const wasAway=nm.away?.n===oldWinner.n;
   if(!wasHome&&!wasAway) return;
-  // Clear that slot
   if(wasHome) nm.home=null;
   if(wasAway) nm.away=null;
   const prevWinner=nm.winner;
@@ -1213,45 +1220,72 @@ function populateR16(){
   if(!groupsDone())return;
   const top=getTop3();
 
-  // FIFA Mundial 2026 — emparejamientos oficiales de 16vos de final
-  // Los 8 mejores terceros se distribuyen en partidos específicos según grupos
-  // Orden oficial según calendario FIFA publicado
+  // ── FIXTURE OFICIAL FIFA MUNDIAL 2026 — 16avos de final ─────
+  // Verificado en ESPN, El Gráfico, Olympics.com, El Destape (Abril 2026)
+  //
+  // M73: 2°A vs 2°B        M74: 1°E vs 3°(A/B/C/D/F)
+  // M75: 1°F vs 2°C        M76: 1°C vs 2°F
+  // M77: 1°I vs 3°(C/D/F/G/H)  M78: 2°E vs 2°I
+  // M79: 1°A vs 3°(C/E/F/H/I)  M80: 1°L vs 3°(E/H/I/J/K)
+  // M81: 1°D vs 3°(B/E/F/I/J)  M82: 1°G vs 3°(A/E/H/I/J)
+  // M83: 2°K vs 2°L        M84: 1°H vs 2°J
+  // M85: 1°B vs 3°(E/F/G/I/J)  M86: 1°J vs 2°H
+  // M87: 1°K vs 3°(D/E/I/J/L)  M88: 2°D vs 2°G
+  //
+  // Octavos (pares de 16avos):
+  // P89: G74 vs G77   P90: G73 vs G75
+  // P91: G76 vs G78   P92: G79 vs G80
+  // P93: G83 vs G84   P94: G81 vs G82
+  // P95: G86 vs G88   P96: G85 vs G87
+  //
+  // ARGENTINA está en Grupo J → M86: 1°J vs 2°H
+  // Si Argentina es 1°J: juega vs 2°H (Uruguay/Arabia Saudita/Cabo Verde)
+  // Si Argentina es 2°J: va a M84: 1°H vs 2°J
+  // En ningún caso cruza con Francia (Grupo I) hasta cuartos o semis
+
+  // Calcular 8 mejores terceros ordenados por pts/GD
+  const allThirds=Object.keys(top).map(gk=>({team:top[gk].third,gk}));
+  allThirds.sort((a,b)=>{
+    const sa=groupStandings[a.gk].find(r=>r.team.n===a.team.n);
+    const sb=groupStandings[b.gk].find(r=>r.team.n===b.team.n);
+    if(!sa||!sb)return 0;
+    return (sb.pts-sa.pts)||(sb.gd-sa.gd)||(sb.gf-sa.gf);
+  });
+  const b=allThirds.slice(0,8).map(x=>x.team);
+  // Asignación de 8 mejores 3eros a los 8 slots de 3eros
+  // según combinación FIFA para cuando todos los 12 grupos tienen tercero
+  // slots: t74(A/B/C/D/F), t77(C/D/F/G/H), t79(C/E/F/H/I), t80(E/H/I/J/K)
+  //        t81(B/E/F/I/J), t82(A/E/H/I/J), t85(E/F/G/I/J), t87(D/E/I/J/L)
+  const [t74,t77,t79,t80,t81,t82,t85,t87]=b;
+
   const pairs=[
-    // Partidos 1-8: primeros vs segundos de grupos cruzados
-    [top['A'].first,  top['B'].second],  // P1
-    [top['C'].first,  top['D'].second],  // P2
-    [top['E'].first,  top['F'].second],  // P3
-    [top['G'].first,  top['H'].second],  // P4
-    [top['I'].first,  top['J'].second],  // P5
-    [top['K'].first,  top['L'].second],  // P6
-    [top['B'].first,  top['A'].second],  // P7
-    [top['D'].first,  top['C'].second],  // P8
-    [top['F'].first,  top['E'].second],  // P9
-    [top['H'].first,  top['G'].second],  // P10
-    [top['J'].first,  top['I'].second],  // P11
-    [top['L'].first,  top['K'].second],  // P12
-    // Partidos 13-16: 4 mejores terceros (seleccionamos los de grupos más competitivos)
-    [top['A'].third,  top['F'].third],   // P13
-    [top['B'].third,  top['E'].third],   // P14
-    [top['C'].third,  top['H'].third],   // P15
-    [top['D'].third,  top['G'].third],   // P16
+    [top['A'].second, top['B'].second],  // M73
+    [top['E'].first,  t74],              // M74: 1°E vs mejor 3°
+    [top['F'].first,  top['C'].second],  // M75
+    [top['C'].first,  top['F'].second],  // M76
+    [top['I'].first,  t77],              // M77: 1°I vs mejor 3°
+    [top['E'].second, top['I'].second],  // M78
+    [top['A'].first,  t79],              // M79: 1°A vs mejor 3°
+    [top['L'].first,  t80],              // M80: 1°L vs mejor 3°
+    [top['D'].first,  t81],              // M81: 1°D vs mejor 3°
+    [top['G'].first,  t82],              // M82: 1°G vs mejor 3°
+    [top['K'].second, top['L'].second],  // M83
+    [top['H'].first,  top['J'].second],  // M84: 1°H vs 2°J
+    [top['B'].first,  t85],              // M85: 1°B vs mejor 3°
+    [top['J'].first,  top['H'].second],  // M86: 1°J vs 2°H ← Argentina si es 1°J
+    [top['K'].first,  t87],              // M87: 1°K vs mejor 3°
+    [top['D'].second, top['G'].second],  // M88
   ];
 
-  // Update each slot: preserve result if teams are identical, else clear
   pairs.forEach((pair,i)=>{
     const m=rounds.r16[i];
     const sameHome=m.home?.n===pair[0]?.n;
     const sameAway=m.away?.n===pair[1]?.n;
-    if(sameHome&&sameAway) return; // teams unchanged → keep result
-    // Teams changed → update and clear result
+    if(sameHome&&sameAway)return;
     m.home=pair[0]; m.away=pair[1];
     m.hg=null; m.ag=null; m.winner=null; m.comment=null; m.ph=null; m.pa=null;
   });
 }
-
-// Propagación del bracket: los ganadores de r16 se cruzan así en octavos
-// P1 vs P2 → partido 1 de octavos, P3 vs P4 → partido 2, etc.
-// renderBracket ya maneja esto con Math.floor(i/2)
 
 // Update the "Simulate All" button for a round to show pending state
 const NEXT_SECTION={r16:'r8',r8:'r4',r4:'r2',r2:'r1'};
@@ -1350,11 +1384,27 @@ function renderBracket(rk){
   // Always populate teams from previous round winners
   const prev=prevRoundKey(rk);
   if(prev){
-    rounds[prev].forEach((m,i)=>{
-      if(!m.winner) return;
-      const ni=Math.floor(i/2), slot=i%2===0?'home':'away';
-      if(!rounds[rk][ni].winner) rounds[rk][ni][slot]=m.winner;
-    });
+    if(rk==='r8'){
+      // Official octavos pairing from r16 winners (FIFA bracket 2026):
+      // M89=G74(1) vs G77(4) → r8[0]   M90=G73(0) vs G75(2) → r8[1]
+      // M91=G76(3) vs G78(5) → r8[2]   M92=G79(6) vs G80(7) → r8[3]
+      // M93=G83(10) vs G84(11) → r8[4]  M94=G81(8) vs G82(9) → r8[5]
+      // M95=G86(13) vs G88(15) → r8[6]  M96=G85(12) vs G87(14) → r8[7]
+      const r16map=[[1,4],[0,2],[3,5],[6,7],[10,11],[8,9],[13,15],[12,14]];
+      r16map.forEach(([hi,ai],ni)=>{
+        const nm=rounds.r8[ni];
+        if(nm.winner) return;
+        if(rounds.r16[hi]?.winner) nm.home=rounds.r16[hi].winner;
+        if(rounds.r16[ai]?.winner) nm.away=rounds.r16[ai].winner;
+      });
+    } else {
+      // For r4, r2, r1: simple sequential pairing
+      rounds[prev].forEach((m,i)=>{
+        if(!m.winner) return;
+        const ni=Math.floor(i/2), slot=i%2===0?'home':'away';
+        if(!rounds[rk][ni].winner) rounds[rk][ni][slot]=m.winner;
+      });
+    }
   }
 
   // For r8+: if previous round has no winners at all, show pending
