@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v1.8.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v2.1.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -158,7 +158,7 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* BRACKET */
-.bracket-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+.bracket-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
 .bracket-match{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
 .bracket-match.pending{opacity:.45;}
 .bm-label{font-size:10px;color:var(--muted);padding:6px 10px 0;text-transform:uppercase;letter-spacing:.5px;}
@@ -169,17 +169,27 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 .b-flag{font-size:17px;} .b-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .b-score{font-family:'Bebas Neue',sans-serif;font-size:17px;min-width:16px;text-align:right;}
 .b-tbd{color:var(--muted);font-style:italic;font-size:12px;}
+.bm-result{margin:0 10px 8px;padding:7px 9px;background:rgba(255,255,255,.03);border-radius:5px;font-size:12px;display:none;}
+.bm-result.show{display:block;}
+.bm-result-winner{color:var(--green);font-weight:500;margin-bottom:3px;}
+.bm-result-comment{color:var(--muted);line-height:1.4;font-size:11px;}
+.bm-result-probs{display:flex;gap:6px;margin-top:5px;}
+.bm-prob-wrap{flex:1;}
+.bm-prob-label{font-size:9px;color:var(--muted);margin-bottom:2px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bm-prob-bar{height:3px;border-radius:2px;background:var(--border2);overflow:hidden;}
+.bm-prob-fill{height:100%;border-radius:2px;}
+.bm-prob-fill.h{background:var(--blue);} .bm-prob-fill.a{background:var(--accent2);}
+.bm-prob-pct{font-size:9px;text-align:center;margin-top:2px;color:var(--muted);}
 .bm-sim-btn{width:100%;padding:7px;background:transparent;border:none;border-top:1px solid var(--border);
   color:var(--muted);font-size:12px;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;
   display:flex;align-items:center;justify-content:center;gap:5px;}
 .bm-sim-btn:hover:not(:disabled){background:rgba(232,200,64,.05);color:var(--accent);}
-.bm-sim-btn:disabled{display:none;}
+.bm-sim-btn:disabled{opacity:.4;cursor:not-allowed;}
 .bm-sim-btn.resim{color:var(--blue);}
 .bm-sim-btn.resim:hover{color:var(--blue);background:rgba(59,130,246,.06);}
 .bm-actions{display:flex;border-top:1px solid var(--border);}
 .bm-actions .bm-sim-btn{border-top:none;border-right:1px solid var(--border);flex:1;}
 .bm-actions .bm-sim-btn:last-child{border-right:none;}
-.bm-done{text-align:center;padding:5px;font-size:11px;color:var(--green);border-top:1px solid var(--border);}
 
 /* CHAMPION */
 .champion-display{text-align:center;padding:2.5rem 1rem;}
@@ -348,7 +358,7 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v1.8.0 · by MonsterAndy</footer>
+<footer class="site-footer">v2.1.0 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -560,7 +570,7 @@ function simScore(hR,aR,knockout=false){
 async function runSim(homeN,awayN,knockout=false){
   const hR=getRating(homeN),aR=getRating(awayN);
   const{hg,ag,ph,pd,pa}=simScore(hR,aR,knockout);
-  await sleep(40+Math.random()*35);
+  await sleep(20+Math.random()*15);
   return{home_goals:hg,away_goals:ag,prob_home:ph,prob_draw:pd,prob_away:pa,comment:getComment(hg,ag)};
 }
 
@@ -582,7 +592,7 @@ function resetRoundsFrom(startRound){
   const idx=ROUND_ORDER.indexOf(startRound);
   for(let i=idx;i<ROUND_ORDER.length;i++){
     const rk=ROUND_ORDER[i];
-    rounds[rk].forEach(m=>{m.home=null;m.away=null;m.hg=null;m.ag=null;m.winner=null;});
+    rounds[rk].forEach(m=>{m.home=null;m.away=null;m.hg=null;m.ag=null;m.winner=null;m.comment=null;m.ph=null;m.pa=null;});
   }
 }
 
@@ -826,7 +836,7 @@ async function simAllGroups(){
   for(const{gk,mi}of allMatches){
     try{await simGroupMatch(gk,mi,true);}catch(e){break;}
     done++;if(fill)fill.style.width=(done/total*100)+'%';
-    await sleep(15);
+    await sleep(8);
   }
   btn.disabled=false;
   showToast(t('toast_groups_done'));
@@ -894,41 +904,69 @@ function populateR16(){
 //  RENDER BRACKET
 // ============================================================
 function prevRoundKey(rk){return{r16:null,r8:'r16',r4:'r8',r2:'r4',r1:'r2'}[rk];}
+
+function buildKOResultHtml(match){
+  if(match.hg===null||!match.home||!match.away) return '';
+  const homeN=match.home.n, awayN=match.away.n;
+  const winner=match.hg>match.ag?homeN:awayN;
+  const winnerLbl=currentLang==='es'?`✓ ${winner} gana`:`✓ ${winner} wins`;
+  return `<div class="bm-result show">
+    <div class="bm-result-winner">${winnerLbl}</div>
+    <div class="bm-result-comment">${match.comment||''}</div>
+    <div class="bm-result-probs">
+      <div class="bm-prob-wrap">
+        <div class="bm-prob-label">${homeN}</div>
+        <div class="bm-prob-bar"><div class="bm-prob-fill h" style="width:${match.ph||0}%"></div></div>
+        <div class="bm-prob-pct">${match.ph||0}%</div>
+      </div>
+      <div class="bm-prob-wrap">
+        <div class="bm-prob-label">${awayN}</div>
+        <div class="bm-prob-bar"><div class="bm-prob-fill a" style="width:${match.pa||0}%"></div></div>
+        <div class="bm-prob-pct">${match.pa||0}%</div>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderBracket(rk){
   const container=document.getElementById(`bracket-${rk}`); if(!container)return;
 
-  // Check if groups done for r16
+  // For r16: if groups not done, show pending
   if(rk==='r16'&&!groupsDone()){
-    container.innerHTML=pendingHtml(t('pending_title'),t('pending_desc'),`showSection('grupos',document.querySelector('.nav-tab'))`,t('go_groups'));
-    return;
-  }
-  // Check previous round done
-  const prev=prevRoundKey(rk);
-  if(prev&&rounds[prev].some(m=>!m.winner)){
-    container.innerHTML=pendingHtml(t('pending_title'),t('pending_desc'),`showSection('${prev}',document.querySelectorAll('.nav-tab')[${ROUND_ORDER.indexOf(prev)+1}])`,t('go_prev'));
+    container.innerHTML=pendingHtml(t('pending_title'),t('pending_desc'),'grupos',t('go_groups'));
     return;
   }
 
-  // Populate from previous round winners
+  // Always populate teams from previous round winners
+  const prev=prevRoundKey(rk);
   if(prev){
     rounds[prev].forEach((m,i)=>{
-      if(!m.winner)return;
-      const ni=Math.floor(i/2),slot=i%2===0?'home':'away';
-      if(!rounds[rk][ni].winner){rounds[rk][ni][slot]=m.winner;}
+      if(!m.winner) return;
+      const ni=Math.floor(i/2), slot=i%2===0?'home':'away';
+      if(!rounds[rk][ni].winner) rounds[rk][ni][slot]=m.winner;
     });
   }
 
+  // For r8+: if previous round has no winners at all, show pending pointing to first incomplete
+  if(prev&&rounds[prev].every(m=>!m.winner)){
+    const target=firstPendingRound(rk);
+    const lbl=target==='grupos'?t('go_groups'):t('go_prev');
+    container.innerHTML=pendingHtml(t('pending_title'),t('pending_desc'),target,lbl);
+    return;
+  }
+
   const matches=rounds[rk];
+  const simLbl=currentLang==='es'?'Simular':'Simulate';
+  const resimLbl=currentLang==='es'?'Resimular':'Re-simulate';
   let html='<div class="bracket-grid">';
   matches.forEach((match,i)=>{
-    const home=match.home,away=match.away;
+    const home=match.home, away=match.away;
     const played=match.hg!==null;
     const ready=home&&away;
     const hC=played?(match.hg>match.ag?'winner':'loser'):'';
     const aC=played?(match.ag>match.hg?'winner':'loser'):'';
     const pend=(!home||!away)?'pending':'';
-    const simLbl=currentLang==='es'?'Simular':'Simulate';
-    const resimLbl=currentLang==='es'?'Resimular':'Re-simulate';
+
     html+=`<div class="bracket-match ${pend}" id="bm-${match.id}">
       <div class="bm-label">${currentLang==='es'?'Partido':'Match'} ${i+1}</div>
       <div class="bracket-team ${hC}">
@@ -941,13 +979,12 @@ function renderBracket(rk){
         <span class="b-name ${!away?'b-tbd':''}">${away?away.n:(currentLang==='es'?'Por definir':'TBD')}</span>
         <span class="b-score">${played?match.ag:''}</span>
       </div>
-      ${ready ? `<div class="bm-actions">
-        ${!played
-          ? `<button class="bm-sim-btn" id="bsb-${match.id}" onclick="simKO('${rk}',${i})">▶ ${simLbl}</button>`
-          : `<button class="bm-sim-btn resim" id="bsb-${match.id}" onclick="simKO('${rk}',${i})">↺ ${resimLbl}</button>`
-        }
-      </div>` : ''}
-      ${played?`<div class="bm-done">${t('advances',match.winner.n)}</div>`:''}
+      ${played?buildKOResultHtml(match):''}
+      ${ready?`<div class="bm-actions">
+        <button class="bm-sim-btn${played?' resim':''}" id="bsb-${match.id}" onclick="simKO('${rk}',${i})">
+          ${played?`↺ ${resimLbl}`:`▶ ${simLbl}`}
+        </button>
+      </div>`:''}
     </div>`;
   });
   html+='</div>';
@@ -963,7 +1000,25 @@ function renderBracket(rk){
   }
 }
 
-function pendingHtml(title,desc,onclick,btnLabel){
+function firstPendingRound(rk){
+  // Walk back from rk to find the earliest round that's not complete
+  const order=['r16','r8','r4','r2','r1'];
+  const idx=order.indexOf(rk);
+  // Check groups first if rk is r16
+  if(rk==='r16') return 'grupos';
+  // Walk backwards to find first incomplete round
+  for(let i=0;i<idx;i++){
+    const r=order[i];
+    if(rounds[r].every(m=>!m.winner)) return r;
+    if(rounds[r].some(m=>!m.winner)) return r;
+  }
+  return order[idx-1];
+}
+
+function pendingHtml(title,desc,targetRk,btnLabel){
+  const sectionId = targetRk==='grupos' ? 'grupos' : targetRk;
+  const tabIdx = {grupos:0,r16:1,r8:2,r4:3,r2:4,r1:5}[sectionId];
+  const onclick=`showSection('${sectionId}',document.querySelectorAll('.nav-tab')[${tabIdx}])`;
   return `<div class="pending-msg">
     <div class="big">⏳</div>
     <h3>${title}</h3>
@@ -983,6 +1038,8 @@ async function simKO(rk,idx,silent=false){
   try{
     const r=await runSim(match.home.n,match.away.n,true);
     match.hg=r.home_goals;match.ag=r.away_goals;
+    match.ph=r.prob_home;match.pa=r.prob_away;
+    match.comment=r.comment;
     if(match.hg===match.ag)match.hg++;
     match.winner=match.hg>match.ag?match.home:match.away;
     // Reset subsequent rounds when a match is re-simmed
@@ -997,15 +1054,12 @@ async function simKO(rk,idx,silent=false){
 }
 
 async function simAllRound(rk){
-  // Guard: check prerequisites
   if(rk==='r16'&&!groupsDone()){
-    showToast(t('pending_title')+' — '+t('go_groups'));
-    return;
+    showToast(t('pending_title')+' — '+t('go_groups')); return;
   }
   const prev=prevRoundKey(rk);
-  if(prev&&rounds[prev].some(m=>!m.winner)){
-    showToast(t('pending_title'));
-    return;
+  if(prev&&rounds[prev].every(m=>!m.winner)){
+    showToast(t('pending_title')); return;
   }
   if(rk==='r16')populateR16();
   const btn=document.getElementById(`btn-sim-all-${rk}`);
@@ -1020,7 +1074,7 @@ async function simAllRound(rk){
       try{await simKO(rk,i,true);}catch(e){break;}
       done++;
       if(fill)fill.style.width=(done/total*100)+'%';
-      renderBracket(rk);await sleep(20);
+      renderBracket(rk);await sleep(10);
     }
   }
   if(btn)btn.disabled=false;
@@ -1028,10 +1082,9 @@ async function simAllRound(rk){
 }
 
 async function resimAllRound(rk){
-  // Guard: check prerequisites
   if(rk==='r16'&&!groupsDone()){showToast(t('pending_title'));return;}
   const prev=prevRoundKey(rk);
-  if(prev&&rounds[prev].some(m=>!m.winner)){showToast(t('pending_title'));return;}
+  if(prev&&rounds[prev].every(m=>!m.winner)){showToast(t('pending_title'));return;}
   askConfirm(t('confirm_resim_title'),t('confirm_resim_msg'),async()=>{
     // Reset subsequent rounds
     const nextRk={r16:'r8',r8:'r4',r4:'r2',r2:'r1'}[rk];
@@ -1044,7 +1097,7 @@ async function resimAllRound(rk){
       if(m.home&&m.away){
         m.hg=null;m.ag=null;m.winner=null;
         try{await simKO(rk,i,true);}catch(e){break;}
-        renderBracket(rk);await sleep(20);
+        renderBracket(rk);await sleep(10);
       }
     }
     if(btn)btn.disabled=false;
