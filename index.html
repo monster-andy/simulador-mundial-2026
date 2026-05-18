@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v2.1.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v2.4.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -218,6 +218,12 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
 .confirm-box h3{font-size:17px;font-weight:500;margin-bottom:.5rem;}
 .confirm-box p{font-size:13px;color:var(--muted);margin-bottom:1.5rem;line-height:1.5;}
 .confirm-btns{display:flex;gap:10px;justify-content:center;}
+.confirm-btns .btn-ghost{flex:1;text-align:center;}
+.btn-confirm-ok{flex:1;text-align:center;padding:8px 16px;background:transparent;
+  color:var(--red);border:1px solid var(--red);border-radius:7px;font-size:13px;
+  cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.btn-primary.has-pending{background:#d97706;animation:pulse-btn 1.5s ease-in-out infinite;}
+@keyframes pulse-btn{0%,100%{opacity:1}50%{opacity:.75}}
 
 @media(max-width:640px){
   header{grid-template-columns:1fr auto;grid-template-rows:auto auto;}
@@ -258,7 +264,7 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
     <p id="confirm-msg"></p>
     <div class="confirm-btns">
       <button class="btn-ghost" onclick="closeConfirm()"><span data-t="cancel"></span></button>
-      <button class="btn-danger" id="confirm-ok"><span data-t="confirm_yes"></span></button>
+      <button class="btn-confirm-ok" id="confirm-ok"><span data-t="confirm_yes"></span></button>
     </div>
   </div>
 </div>
@@ -358,7 +364,7 @@ main{max-width:1200px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v2.1.0 · by MonsterAndy</footer>
+<footer class="site-footer">v2.4.0 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -380,7 +386,7 @@ const LANG = {
     r1_title:'GRAN FINAL', r1_sub:'MetLife Stadium, Nueva Jersey · 19 de julio 2026',
     sim_auto:'Simulación automática', sim_auto_desc:'Simula todos los partidos de esta fase con un clic',
     ko_action_desc:'Simulá partidos individuales o toda la ronda',
-    btn_sim_all:'⚡ SIMULAR TODOS', btn_resim_all:'↺ Resimular todos', btn_reset:'🗑',
+    btn_sim_all:'⚡ SIMULAR TODOS', btn_resim_all:'↺ Resimular todos', btn_reset:'🗑', btn_continue:'CONTINUAR',
     cancel:'Cancelar', confirm_yes:'Sí, resetear',
     confirm_reset_title:'¿Resetear esta sección?',
     confirm_reset_msg:'Se borrarán los resultados de esta ronda y todas las siguientes.',
@@ -410,7 +416,7 @@ const LANG = {
     r1_title:'THE FINAL', r1_sub:'MetLife Stadium, New Jersey · July 19, 2026',
     sim_auto:'Auto-simulate', sim_auto_desc:'Simulate all matches in this stage with one click',
     ko_action_desc:'Simulate individual matches or the entire round',
-    btn_sim_all:'⚡ SIMULATE ALL', btn_resim_all:'↺ Re-simulate all', btn_reset:'🗑',
+    btn_sim_all:'⚡ SIMULATE ALL', btn_resim_all:'↺ Re-simulate all', btn_reset:'🗑', btn_continue:'CONTINUE',
     cancel:'Cancel', confirm_yes:'Yes, reset',
     confirm_reset_title:'Reset this section?',
     confirm_reset_msg:'Results for this round and all following rounds will be cleared.',
@@ -440,7 +446,6 @@ function applyLang() {
   const lt=document.getElementById('logo-top'), lb=document.getElementById('logo-bottom');
   if(lt) lt.textContent=t('logo_top');
   if(lb) lb.textContent=t('logo_bottom');
-  // After render, match logo-top width to logo-bottom by adjusting letter-spacing
   requestAnimationFrame(()=>{
     if(lt&&lb){
       const diff=lb.offsetWidth-lt.offsetWidth;
@@ -603,7 +608,7 @@ function showSection(name,btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById(`section-${name}`).classList.add('active');
-  if(btn) btn.classList.add('active');
+  if(btn){ btn.classList.add('active'); }
   else{
     const tabs=document.querySelectorAll('.nav-tab');
     const idx={grupos:0,r16:1,r8:2,r4:3,r2:4,r1:5}[name];
@@ -736,6 +741,54 @@ function buildResultHtml(r,homeN,awayN){
     </div>`;
 }
 
+// Snapshot top-3 names for a group
+function getGroupTop3snap(gk){
+  const s=[...groupStandings[gk]].sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);
+  return [s[0]?.team.n||'', s[1]?.team.n||'', s[2]?.team.n||''];
+}
+
+// When a group's classification changes, find and reset only the r16 slots
+// that were using the old teams, then cascade resets through later rounds
+function invalidateAffectedMatches(gk, before3, after3){
+  const changedNames=new Set();
+  before3.forEach((n,i)=>{ if(n!==after3[i]) changedNames.add(n); });
+  after3.forEach((n,i)=>{ if(n!==before3[i]) changedNames.add(n); });
+  if(changedNames.size===0) return;
+
+  // Find which r16 matches involve any of the changed team names
+  const affectedR16=new Set();
+  rounds.r16.forEach((m,i)=>{
+    if(changedNames.has(m.home?.n)||changedNames.has(m.away?.n)) affectedR16.add(i);
+  });
+
+  // Reset affected r16 matches and cascade forward
+  affectedR16.forEach(i=>{
+    const m=rounds.r16[i];
+    const oldWinner=m.winner;
+    m.hg=null; m.ag=null; m.winner=null; m.comment=null; m.ph=null; m.pa=null;
+    // If this match had a winner, cascade that winner's presence forward
+    if(oldWinner) invalidateCascade('r16', i, oldWinner);
+  });
+}
+
+// Cascade: given a match index in a round whose winner changed, reset downstream matches
+function invalidateCascade(rk, idx, oldWinner){
+  const nextRk={r16:'r8',r8:'r4',r4:'r2',r2:'r1'}[rk];
+  if(!nextRk) return;
+  const ni=Math.floor(idx/2);
+  const nm=rounds[nextRk][ni];
+  if(!nm) return;
+  const wasHome=nm.home?.n===oldWinner.n;
+  const wasAway=nm.away?.n===oldWinner.n;
+  if(!wasHome&&!wasAway) return;
+  // Clear that slot
+  if(wasHome) nm.home=null;
+  if(wasAway) nm.away=null;
+  const prevWinner=nm.winner;
+  nm.hg=null; nm.ag=null; nm.winner=null; nm.comment=null; nm.ph=null; nm.pa=null;
+  if(prevWinner) invalidateCascade(nextRk, ni, prevWinner);
+}
+
 // ============================================================
 //  SIM GROUP MATCH
 // ============================================================
@@ -751,8 +804,16 @@ async function simGroupMatch(gk,mi,silent=false){
     if(hEl)hEl.textContent=r.home_goals; if(aEl)aEl.textContent=r.away_goals;
     const ri=document.getElementById(`ri-${key}`);
     if(ri){ri.innerHTML=buildResultHtml(groupResults[key],home.n,away.n);ri.classList.add('show');}
+    // Snapshot top-3 before updating standings
+    const before3=getGroupTop3snap(gk);
     updateStandings(gk);
-    resetRoundsFrom('r16'); // reset knockout when groups change
+    const after3=getGroupTop3snap(gk);
+    // Invalidate only affected knockout matches
+    if(JSON.stringify(before3)!==JSON.stringify(after3)){
+      invalidateAffectedMatches(gk, before3, after3);
+    }
+    // Always repopulate r16 with current standings if groups complete
+    if(groupsDone()){ populateR16(); updateRoundButtonState('r16'); }
     if(btn){btn.disabled=false;btn.innerHTML=t('resim_btn');btn.className='btn-sim done';}
   }catch(e){
     if(btn){btn.disabled=false;btn.innerHTML=t('sim_btn');}
@@ -885,14 +946,15 @@ function populateR16(){
     [top['D'].third,  top['G'].third],   // P16
   ];
 
-  // Solo repoblar slots que no tienen ganador aún
+  // Update each slot: preserve result if teams are identical, else clear
   pairs.forEach((pair,i)=>{
-    if(rounds.r16[i].winner)return;
-    rounds.r16[i].home=pair[0];
-    rounds.r16[i].away=pair[1];
-    rounds.r16[i].hg=null;
-    rounds.r16[i].ag=null;
-    rounds.r16[i].winner=null;
+    const m=rounds.r16[i];
+    const sameHome=m.home?.n===pair[0]?.n;
+    const sameAway=m.away?.n===pair[1]?.n;
+    if(sameHome&&sameAway) return; // teams unchanged → keep result
+    // Teams changed → update and clear result
+    m.home=pair[0]; m.away=pair[1];
+    m.hg=null; m.ag=null; m.winner=null; m.comment=null; m.ph=null; m.pa=null;
   });
 }
 
@@ -900,9 +962,24 @@ function populateR16(){
 // P1 vs P2 → partido 1 de octavos, P3 vs P4 → partido 2, etc.
 // renderBracket ya maneja esto con Math.floor(i/2)
 
-// ============================================================
-//  RENDER BRACKET
-// ============================================================
+// Update the "Simulate All" button for a round to show pending state
+function updateRoundButtonState(rk){
+  const btn=document.getElementById(`btn-sim-all-${rk}`);
+  if(!btn) return;
+  const matches=rounds[rk];
+  const hasPending=matches.some(m=>m.home&&m.away&&!m.winner);
+  const hasAny=matches.some(m=>m.winner);
+  if(hasPending&&hasAny){
+    btn.classList.add('has-pending');
+    btn.textContent='⚠ '+t('btn_continue');
+  } else if(hasPending){
+    btn.classList.remove('has-pending');
+    btn.textContent=t('btn_sim_all');
+  } else {
+    btn.classList.remove('has-pending');
+    btn.textContent=t('btn_sim_all');
+  }
+}
 function prevRoundKey(rk){return{r16:null,r8:'r16',r4:'r8',r2:'r4',r1:'r2'}[rk];}
 
 function buildKOResultHtml(match){
@@ -989,6 +1066,7 @@ function renderBracket(rk){
   });
   html+='</div>';
   container.innerHTML=html;
+  updateRoundButtonState(rk);
 
   if(rk==='r1'&&rounds.r1[0].winner){
     const w=rounds.r1[0].winner;
