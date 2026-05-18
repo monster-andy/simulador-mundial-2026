@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v4.3.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v4.4.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -428,7 +428,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v4.3.0 · by MonsterAndy</footer>
+<footer class="site-footer">v4.4.0 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -612,64 +612,135 @@ const FIFA_RANK={
   "Nueva Zelanda":45,"Cabo Verde":46,"Haití":47,"Curazao":48
 };
 
-const COMMENTS_WIN_ES=["Dominó con solidez defensiva.","Gol en el segundo tiempo que selló la victoria.","Aprovechó sus oportunidades con eficacia.","Superioridad clara en el mediocampo.","Victoria trabajada ante un rival complicado.","La experiencia marcó la diferencia.","Contragolpes letales que dejaron al rival sin respuesta.","Primer tiempo dominante que definió el partido."];
-const COMMENTS_DRAW_ES=["Partido equilibrado que terminó en empate justo.","Ambos equipos se anularon tácticamente.","Gol tardío que evitó la derrota.","Punto valioso para ambas selecciones.","Pocas ocasiones claras en un juego cerrado."];
-const COMMENTS_WIN_EN=["Dominated with defensive solidity.","A second-half goal sealed the victory.","Clinical finishing made the difference.","Clear midfield superiority.","Hard-fought win against a tough opponent.","Experience proved decisive.","Deadly counter-attacks left the opponent with no answer.","A dominant first half defined the match."];
-const COMMENTS_DRAW_EN=["A balanced game that ended in a fair draw.","Both teams cancelled each other out tactically.","A late goal avoided defeat.","A valuable point for both sides.","Few clear chances in a tight affair."];
+// ── Estilo de juego ──────────────────────────────────────────
+// attack: modifica lambda ofensivo, defend: modifica lambda rival
+// pressure: bonus en fases KO para equipos grandes
+const TEAM_STYLE={
+  "Argentina":  {attack:0.25, defend:0.15, pressure:0.12},
+  "Francia":    {attack:0.20, defend:0.20, pressure:0.10},
+  "España":     {attack:0.15, defend:0.15, pressure:0.10},
+  "Brasil":     {attack:0.25, defend:0.10, pressure:0.08},
+  "Inglaterra": {attack:0.18, defend:0.12, pressure:0.08},
+  "Portugal":   {attack:0.22, defend:0.08, pressure:0.07},
+  "Alemania":   {attack:0.18, defend:0.15, pressure:0.10},
+  "Países Bajos":{attack:0.20,defend:0.10, pressure:0.08},
+  "Uruguay":    {attack:0.08, defend:0.25, pressure:0.10},
+  "Croacia":    {attack:0.05, defend:0.20, pressure:0.15},
+  "Bélgica":    {attack:0.18, defend:0.10, pressure:0.05},
+  "Marruecos":  {attack:0.00, defend:0.28, pressure:0.12},
+  "Japón":      {attack:0.05, defend:0.15, pressure:0.08},
+  "Colombia":   {attack:0.15, defend:0.05, pressure:0.05},
+  "México":     {attack:0.10, defend:0.10, pressure:0.00},
+  "Senegal":    {attack:0.10, defend:0.10, pressure:0.05},
+  "Suiza":      {attack:0.05, defend:0.18, pressure:0.08},
+  "EE.UU.":     {attack:0.10, defend:0.05, pressure:0.05},
+  "Noruega":    {attack:0.15, defend:0.05, pressure:0.03},
+  "Turquía":    {attack:0.10, defend:0.05, pressure:0.03},
+  "Ecuador":    {attack:0.08, defend:0.10, pressure:0.02},
+  "Irán":       {attack:-0.05,defend:0.20, pressure:0.05},
+};
+function getStyle(name){return TEAM_STYLE[name]||{attack:0,defend:0,pressure:0};}
 
-function getComment(hg,ag){
-  const isEs=currentLang==='es';
-  if(hg===ag) return (isEs?COMMENTS_DRAW_ES:COMMENTS_DRAW_EN)[Math.floor(Math.random()*(isEs?COMMENTS_DRAW_ES:COMMENTS_DRAW_EN).length)];
-  const arr=isEs?COMMENTS_WIN_ES:COMMENTS_WIN_EN;
-  return arr[Math.floor(Math.random()*arr.length)];
+// ── Historial directo (bias en probabilidad %) ───────────────
+const H2H={
+  "Argentina|Brasil":6,"Brasil|Argentina":-6,
+  "España|Francia":4,"Francia|España":-4,
+  "Argentina|Francia":3,"Francia|Argentina":-3,
+  "Alemania|Francia":3,"Francia|Alemania":-3,
+  "Croacia|Brasil":4,"Brasil|Croacia":-4,
+  "Marruecos|España":3,"España|Marruecos":-3,
+  "Marruecos|Portugal":2,"Portugal|Marruecos":-2,
+  "Japón|Alemania":3,"Alemania|Japón":-3,
+  "Japón|España":3,"España|Japón":-3,
+  "Uruguay|Portugal":2,"Portugal|Uruguay":-2,
+  "Colombia|Argentina":2,"Argentina|Colombia":-2,
+};
+function getH2H(h,a){return H2H[`${h}|${a}`]||0;}
+
+// ── Comentarios contextuales ─────────────────────────────────
+const CMTS={
+  es:{
+    win_def: ["Solidez defensiva impenetrable.","El bloque bajo funcionó a la perfección.","Contragolpe letal en el momento exacto.","Defendieron con orden y golpearon en frío."],
+    win_atk: ["Derroche ofensivo sin precedentes.","Goleada que deja al rival sin argumentos.","Superioridad técnica aplastante.","Tuvieron la pelota y al rival encerrado."],
+    win_std: ["Gol en el segundo tiempo que selló el partido.","Aprovecharon sus chances con eficacia.","La jerarquía marcó la diferencia.","Partido trabajado con remate certero.","Dominaron el mediocampo y encontraron el gol."],
+    win_ups: ["¡Sorpresa enorme! El favorito cayó ante el rival menos esperado.","El underdog escribió historia en este Mundial.","Nadie esperaba este resultado. El fútbol es así.","Táctica impecable del menos favorecido."],
+    drw_tgt: ["Empate justo en un partido muy cerrado.","Ambos equipos se anularon tácticamente.","Pocas chances claras en un duelo de estrategias.","Punto valioso para ambos."],
+    drw_gls: ["Partidazo con goles de ambos lados.","Fue un ida y vuelta que terminó igualado.","Gol tardío que evitó la derrota visitante."],
+    ko_pen:  ["Se fue a los penales en un partido sin rendición.","Tiempo extra agónico antes del desempate final.","La tanda de penales decidió quién sigue en el Mundial."],
+  },
+  en:{
+    win_def: ["Impenetrable defensive display.","The low block worked to perfection.","A deadly counter-attack at the right moment.","Disciplined at the back and clinical up front."],
+    win_atk: ["An offensive masterclass.","A goal-fest that left opponents clueless.","Overwhelming technical superiority.","Dominated possession and pinned rivals back."],
+    win_std: ["A second-half goal sealed the win.","Clinical finishing when it mattered.","Experience and quality made the difference.","Hard-fought win with a composed finish.","Controlled midfield and found the net."],
+    win_ups: ["Stunning upset! The favourite falls.","The underdog wrote history at this World Cup.","Nobody saw this coming. Football is football.","Tactical perfection from the underdogs."],
+    drw_tgt: ["A fair draw in a very tight contest.","Both sides cancelled each other out.","Few clear chances in a battle of strategies.","A valuable point for both teams."],
+    drw_gls: ["A thrilling back-and-forth that ended level.","End-to-end action with goals on both sides.","A late equaliser denied the win."],
+    ko_pen:  ["Decided by penalties after a dramatic contest.","Agonizing extra time before the shootout.","Penalties decided who advances in the World Cup."],
+  }
+};
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function getComment(hg,ag,hR,aR,knockout=false){
+  const C=CMTS[currentLang==='es'?'es':'en'];
+  const diff=hR-aR;
+  const isUpset=(hg>ag&&diff<-15)||(ag>hg&&diff>15);
+  const total=hg+ag;
+  if(hg===ag) return total>=4?pick(C.drw_gls):pick(C.drw_tgt);
+  if(knockout&&Math.min(hg,ag)>=1) return Math.random()<0.4?pick(C.ko_pen):pick(C.win_std);
+  if(isUpset) return pick(C.win_ups);
+  if(total<=1) return pick(C.win_def);
+  if(total>=4) return pick(C.win_atk);
+  return pick(C.win_std);
 }
 
 function getRating(name){const r=FIFA_RANK[name]||40;return Math.round(95-(r-1)*(50/47));}
-function calcProbs(hR,aR){
-  const diff=(hR+4)-aR;
+
+function calcProbs(hR,aR,homeN,awayN,knockout=false){
+  const h2h=getH2H(homeN,awayN);
+  const homeAdv=knockout?2:4;
+  const diff=(hR+homeAdv)-aR+h2h;
   const pH=Math.min(72,Math.max(12,40+diff*0.55));
   const pA=Math.min(65,Math.max(8,32-diff*0.45));
-  const pD=Math.max(8,100-pH-pA);
+  const pD=knockout?Math.max(5,100-pH-pA):Math.max(8,100-pH-pA);
   const tot=pH+pD+pA;
   const ph=Math.round(pH/tot*100),pa=Math.round(pA/tot*100);
   return{ph,pd:100-ph-pa,pa};
 }
-// Poisson-like goal generator — realistic World Cup distribution
-// avg goals per team ~1.15, very rare >3
+
 function randGoals(lambda){
-  // Inverse CDF approximation for Poisson
   const r=Math.random();
   const probs=[
-    Math.exp(-lambda),                          // 0 goals
-    lambda*Math.exp(-lambda),                   // 1 goal
-    lambda*lambda/2*Math.exp(-lambda),          // 2 goals
-    lambda*lambda*lambda/6*Math.exp(-lambda),   // 3 goals
-    Math.pow(lambda,4)/24*Math.exp(-lambda),    // 4 goals
+    Math.exp(-lambda),
+    lambda*Math.exp(-lambda),
+    lambda*lambda/2*Math.exp(-lambda),
+    lambda*lambda*lambda/6*Math.exp(-lambda),
+    Math.pow(lambda,4)/24*Math.exp(-lambda),
   ];
   let cum=0;
   for(let g=0;g<probs.length;g++){cum+=probs[g];if(r<cum)return g;}
-  return 4; // max cap
+  return 4;
 }
-function simScore(hR,aR,knockout=false){
-  const{ph,pd,pa}=calcProbs(hR,aR);
+
+function simScore(hR,aR,homeN,awayN,knockout=false){
+  const{ph,pd,pa}=calcProbs(hR,aR,homeN,awayN,knockout);
   const rand=Math.random()*100;
   let outcome=rand<ph?'home':rand<ph+pd?'draw':'away';
-  // Lambda (avg goals) scales with team quality: 0.7–1.6
-  const hLambda=0.7+(hR/95)*0.9;
-  const aLambda=0.6+(aR/95)*0.8;
-  let hg=randGoals(hLambda), ag=randGoals(aLambda);
-  // Force outcome
+  const hSt=getStyle(homeN),aSt=getStyle(awayN);
+  const koFactor=knockout?0.82:1.0;
+  const hLambda=Math.max(0.4,(0.7+(hR/95)*0.9+hSt.attack-aSt.defend+(knockout?hSt.pressure:0))*koFactor);
+  const aLambda=Math.max(0.4,(0.6+(aR/95)*0.8+aSt.attack-hSt.defend+(knockout?aSt.pressure:0))*koFactor);
+  let hg=randGoals(hLambda),ag=randGoals(aLambda);
   if(outcome==='home'&&hg<=ag){hg=ag+1;}
   if(outcome==='away'&&ag<=hg){ag=hg+1;}
   if(outcome==='draw'){const g=Math.min(hg,ag);hg=g;ag=g;}
-  if(knockout&&hg===ag)hg++; // no draw in KO
+  if(knockout&&hg===ag)hg++;
   return{hg,ag,ph,pd,pa};
 }
+
 async function runSim(homeN,awayN,knockout=false,fast=false){
   const hR=getRating(homeN),aR=getRating(awayN);
-  const{hg,ag,ph,pd,pa}=simScore(hR,aR,knockout);
+  const{hg,ag,ph,pd,pa}=simScore(hR,aR,homeN,awayN,knockout);
   await sleep(fast ? 5+Math.random()*4 : 10+Math.random()*8);
-  return{home_goals:hg,away_goals:ag,prob_home:ph,prob_draw:pd,prob_away:pa,comment:getComment(hg,ag)};
+  return{home_goals:hg,away_goals:ag,prob_home:ph,prob_draw:pd,prob_away:pa,comment:getComment(hg,ag,hR,aR,knockout)};
 }
 
 // ============================================================
