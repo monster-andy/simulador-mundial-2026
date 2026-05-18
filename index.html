@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v3.5.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v3.6.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -179,8 +179,8 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
 
 /* BRACKET */
 .bracket-wrap{max-width:400px;margin:0 auto;}
-.bracket-grid{display:flex;flex-direction:column;gap:12px;}
-.bracket-match{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.bracket-grid{display:flex;flex-direction:column;gap:12px;width:100%;}
+.bracket-match{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;width:100%;box-sizing:border-box;}
 .bracket-match.pending{opacity:.45;}
 .bm-label{font-size:10px;color:var(--muted);padding:6px 10px 0;text-transform:uppercase;letter-spacing:.5px;}
 .bracket-team{display:flex;align-items:center;gap:8px;padding:9px 10px;font-size:13px;border-bottom:1px solid var(--border);border-left:3px solid transparent;}
@@ -316,85 +316,95 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
 <div class="section" id="section-r16">
   <div class="section-title" data-t="r16_title"></div>
   <div class="section-sub" data-t="r16_sub"></div>
-  <div class="action-bar action-bar-groups">
-    <div class="action-bar-left-col">
-      <div class="action-bar-text" data-t="ko_action_desc"></div>
-      <div class="progress-wrap groups-progress"><div class="progress-fill" id="progress-fill-r16" style="width:0%"></div></div>
-    </div>
-    <div class="action-btns">
-      <button class="btn-primary btn-primary-wide" onclick="simAllRound('r16')" id="btn-sim-all-r16" data-t="btn_sim_all"></button>
-      <button class="btn-icon-reset" onclick="askReset('r16')" title="Reset">🗑</button>
+  <div class="bracket-wrap">
+    <div class="action-bar action-bar-groups">
+      <div class="action-bar-left-col">
+        <div class="action-bar-text" data-t="ko_action_desc"></div>
+        <div class="progress-wrap groups-progress"><div class="progress-fill" id="progress-fill-r16" style="width:0%"></div></div>
+      </div>
+      <div class="action-btns">
+        <button class="btn-primary btn-primary-wide" onclick="simAllRound('r16')" id="btn-sim-all-r16" data-t="btn_sim_all"></button>
+        <button class="btn-icon-reset" onclick="askReset('r16')" title="Reset">🗑</button>
+      </div>
     </div>
   </div>
-  <div id="bracket-r16" class="bracket-grid"></div>
+  <div id="bracket-r16" class="bracket-wrap"></div>
 </div>
 
 <div class="section" id="section-r8">
   <div class="section-title" data-t="r8_title"></div>
   <div class="section-sub" data-t="r8_sub"></div>
-  <div class="action-bar action-bar-groups">
-    <div class="action-bar-left-col">
-      <div class="action-bar-text" data-t="ko_action_desc"></div>
-      <div class="progress-wrap groups-progress"><div class="progress-fill" id="progress-fill-r8" style="width:0%"></div></div>
-    </div>
-    <div class="action-btns">
-      <button class="btn-primary btn-primary-wide" onclick="simAllRound('r8')" id="btn-sim-all-r8" data-t="btn_sim_all"></button>
-      <button class="btn-icon-reset" onclick="askReset('r8')" title="Reset">🗑</button>
+  <div class="bracket-wrap">
+    <div class="action-bar action-bar-groups">
+      <div class="action-bar-left-col">
+        <div class="action-bar-text" data-t="ko_action_desc"></div>
+        <div class="progress-wrap groups-progress"><div class="progress-fill" id="progress-fill-r8" style="width:0%"></div></div>
+      </div>
+      <div class="action-btns">
+        <button class="btn-primary btn-primary-wide" onclick="simAllRound('r8')" id="btn-sim-all-r8" data-t="btn_sim_all"></button>
+        <button class="btn-icon-reset" onclick="askReset('r8')" title="Reset">🗑</button>
+      </div>
     </div>
   </div>
-  <div id="bracket-r8" class="bracket-grid"></div>
+  <div id="bracket-r8" class="bracket-wrap"></div>
 </div>
 
 <div class="section" id="section-r4">
   <div class="section-title" data-t="r4_title"></div>
   <div class="section-sub" data-t="r4_sub"></div>
-  <div class="action-bar action-bar-groups">
-    <div class="action-bar-left-col">
-      <div class="action-bar-text" data-t="ko_action_desc"></div>
-      <div class="progress-wrap groups-progress"><div class="progress-fill" id="progress-fill-r4" style="width:0%"></div></div>
-    </div>
-    <div class="action-btns">
-      <button class="btn-primary btn-primary-wide" onclick="simAllRound('r4')" id="btn-sim-all-r4" data-t="btn_sim_all"></button>
-      <button class="btn-icon-reset" onclick="askReset('r4')" title="Reset">🗑</button>
+  <div class="bracket-wrap">
+    <div class="action-bar action-bar-groups">
+      <div class="action-bar-left-col">
+        <div class="action-bar-text" data-t="ko_action_desc"></div>
+        <div class="progress-wrap groups-progress"><div class="progress-fill" id="progress-fill-r4" style="width:0%"></div></div>
+      </div>
+      <div class="action-btns">
+        <button class="btn-primary btn-primary-wide" onclick="simAllRound('r4')" id="btn-sim-all-r4" data-t="btn_sim_all"></button>
+        <button class="btn-icon-reset" onclick="askReset('r4')" title="Reset">🗑</button>
+      </div>
     </div>
   </div>
-  <div id="bracket-r4" class="bracket-grid"></div>
+  <div id="bracket-r4" class="bracket-wrap"></div>
 </div>
 
 <div class="section" id="section-r2">
   <div class="section-title" data-t="r2_title"></div>
   <div class="section-sub" data-t="r2_sub"></div>
-  <div class="action-bar action-bar-groups">
-    <div class="action-bar-left-col">
-      <div class="action-bar-text" data-t="ko_action_desc"></div>
-      <div class="progress-wrap groups-progress"><div class="progress-fill" id="progress-fill-r2" style="width:0%"></div></div>
-    </div>
-    <div class="action-btns">
-      <button class="btn-primary btn-primary-wide" onclick="simAllRound('r2')" id="btn-sim-all-r2" data-t="btn_sim_all"></button>
-      <button class="btn-icon-reset" onclick="askReset('r2')" title="Reset">🗑</button>
+  <div class="bracket-wrap">
+    <div class="action-bar action-bar-groups">
+      <div class="action-bar-left-col">
+        <div class="action-bar-text" data-t="ko_action_desc"></div>
+        <div class="progress-wrap groups-progress"><div class="progress-fill" id="progress-fill-r2" style="width:0%"></div></div>
+      </div>
+      <div class="action-btns">
+        <button class="btn-primary btn-primary-wide" onclick="simAllRound('r2')" id="btn-sim-all-r2" data-t="btn_sim_all"></button>
+        <button class="btn-icon-reset" onclick="askReset('r2')" title="Reset">🗑</button>
+      </div>
     </div>
   </div>
-  <div id="bracket-r2" class="bracket-grid"></div>
+  <div id="bracket-r2" class="bracket-wrap"></div>
 </div>
 
 <div class="section" id="section-r1">
   <div class="section-title" data-t="r1_title"></div>
   <div class="section-sub" data-t="r1_sub"></div>
-  <div class="action-bar action-bar-groups">
-    <div class="action-bar-left-col">
-      <div class="action-bar-text" data-t="ko_action_desc"></div>
-      <div class="progress-wrap groups-progress"><div class="progress-fill" id="progress-fill-r1" style="width:0%"></div></div>
-    </div>
-    <div class="action-btns">
-      <button class="btn-primary btn-primary-wide" onclick="simAllRound('r1')" id="btn-sim-all-r1" data-t="btn_sim_all"></button>
-      <button class="btn-icon-reset" onclick="askReset('r1')" title="Reset">🗑</button>
+  <div class="bracket-wrap">
+    <div class="action-bar action-bar-groups">
+      <div class="action-bar-left-col">
+        <div class="action-bar-text" data-t="ko_action_desc"></div>
+        <div class="progress-wrap groups-progress"><div class="progress-fill" id="progress-fill-r1" style="width:0%"></div></div>
+      </div>
+      <div class="action-btns">
+        <button class="btn-primary btn-primary-wide" onclick="simAllRound('r1')" id="btn-sim-all-r1" data-t="btn_sim_all"></button>
+        <button class="btn-icon-reset" onclick="askReset('r1')" title="Reset">🗑</button>
+      </div>
     </div>
   </div>
-  <div id="bracket-r1" class="bracket-grid"></div>
+  <div id="bracket-r1" class="bracket-wrap"></div>
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v3.5.0 · by MonsterAndy</footer>
+<footer class="site-footer">v3.6.0 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -1090,7 +1100,7 @@ function renderBracket(rk){
   const matches=rounds[rk];
   const simLbl=currentLang==='es'?'Simular':'Simulate';
   const resimLbl=currentLang==='es'?'Resimular':'Re-simulate';
-  let html='<div class="bracket-wrap"><div class="bracket-grid">';
+  let html='<div class="bracket-grid">';
   matches.forEach((match,i)=>{
     const home=match.home, away=match.away;
     const played=match.hg!==null;
@@ -1119,7 +1129,7 @@ function renderBracket(rk){
       </div>`:''}
     </div>`;
   });
-  html+='</div></div>';
+  html+='</div>';
   container.innerHTML=html;
   updateRoundButtonState(rk);
 
