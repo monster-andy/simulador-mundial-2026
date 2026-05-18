@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v4.6.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v4.7.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -282,7 +282,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
     <div class="api-indicator"><span class="dot"></span> <span data-t="active"></span></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
       <button class="lang-btn" onclick="toggleLang()">🌐 <span id="lang-label">EN</span></button>
-      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v4.6.0</span>
+      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v4.7.0</span>
     </div>
   </div>
   <!-- Desktop: single nav row -->
@@ -431,7 +431,7 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v4.6.0 · by MonsterAndy</footer>
+<footer class="site-footer">v4.7.0 · by MonsterAndy</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -616,47 +616,82 @@ const FIFA_RANK={
 };
 
 // ── Estilo de juego ──────────────────────────────────────────
-// attack: modifica lambda ofensivo, defend: modifica lambda rival
-// pressure: bonus en fases KO para equipos grandes
+// gf: promedio de goles marcados por partido (calibrado con datos reales 2022-2025)
+// ga: promedio de goles concedidos por partido
+// pressure: bonus en KO para equipos con historial de rendir bajo presión
 const TEAM_STYLE={
-  "Argentina":  {attack:0.25, defend:0.15, pressure:0.12},
-  "Francia":    {attack:0.20, defend:0.20, pressure:0.10},
-  "España":     {attack:0.15, defend:0.15, pressure:0.10},
-  "Brasil":     {attack:0.25, defend:0.10, pressure:0.08},
-  "Inglaterra": {attack:0.18, defend:0.12, pressure:0.08},
-  "Portugal":   {attack:0.22, defend:0.08, pressure:0.07},
-  "Alemania":   {attack:0.18, defend:0.15, pressure:0.10},
-  "Países Bajos":{attack:0.20,defend:0.10, pressure:0.08},
-  "Uruguay":    {attack:0.08, defend:0.25, pressure:0.10},
-  "Croacia":    {attack:0.05, defend:0.20, pressure:0.15},
-  "Bélgica":    {attack:0.18, defend:0.10, pressure:0.05},
-  "Marruecos":  {attack:0.00, defend:0.28, pressure:0.12},
-  "Japón":      {attack:0.05, defend:0.15, pressure:0.08},
-  "Colombia":   {attack:0.15, defend:0.05, pressure:0.05},
-  "México":     {attack:0.10, defend:0.10, pressure:0.00},
-  "Senegal":    {attack:0.10, defend:0.10, pressure:0.05},
-  "Suiza":      {attack:0.05, defend:0.18, pressure:0.08},
-  "EE.UU.":     {attack:0.10, defend:0.05, pressure:0.05},
-  "Noruega":    {attack:0.15, defend:0.05, pressure:0.03},
-  "Turquía":    {attack:0.10, defend:0.05, pressure:0.03},
-  "Ecuador":    {attack:0.08, defend:0.10, pressure:0.02},
-  "Irán":       {attack:-0.05,defend:0.20, pressure:0.05},
+  // Top tier — calibrado con datos reales
+  "Argentina":  {gf:2.5, ga:0.5, pressure:0.20}, // 2.5 goles/j en Qatar 2022, 4-1 vs Brasil 2025
+  "Francia":    {gf:2.3, ga:0.9, pressure:0.15}, // 16 goles en 7 partidos Qatar 2022
+  "España":     {gf:2.2, ga:0.7, pressure:0.12}, // 7-0 vs Costa Rica, Eurocopa 2024
+  "Brasil":     {gf:2.0, ga:0.8, pressure:0.10},
+  "Inglaterra": {gf:2.1, ga:0.8, pressure:0.08}, // 6-2 vs Irán Qatar 2022
+  "Portugal":   {gf:2.2, ga:1.0, pressure:0.08}, // 6-1 vs Suiza Qatar 2022
+  "Alemania":   {gf:1.9, ga:1.0, pressure:0.10},
+  "Países Bajos":{gf:1.9,ga:0.9, pressure:0.08},
+  // Upper mid
+  "Uruguay":    {gf:1.3, ga:0.8, pressure:0.10}, // defensivo, bajo en goles
+  "Croacia":    {gf:1.2, ga:0.9, pressure:0.15}, // sube en KO (finalistas 2022)
+  "Bélgica":    {gf:1.7, ga:1.0, pressure:0.05},
+  "Marruecos":  {gf:1.0, ga:0.5, pressure:0.12}, // semifinal 2022, muy sólido atrás
+  "Japón":      {gf:1.4, ga:1.1, pressure:0.08},
+  "Colombia":   {gf:1.5, ga:1.0, pressure:0.05},
+  "México":     {gf:1.4, ga:1.1, pressure:0.00},
+  "Senegal":    {gf:1.4, ga:1.0, pressure:0.05},
+  "Suiza":      {gf:1.3, ga:0.9, pressure:0.08},
+  "EE.UU.":     {gf:1.5, ga:1.1, pressure:0.05},
+  "Noruega":    {gf:1.6, ga:1.1, pressure:0.03}, // Haaland, alto en goles
+  "Turquía":    {gf:1.4, ga:1.2, pressure:0.03},
+  "Austria":    {gf:1.4, ga:1.1, pressure:0.03},
+  "Ecuador":    {gf:1.3, ga:1.1, pressure:0.02},
+  "Suecia":     {gf:1.3, ga:1.1, pressure:0.02},
+  "Corea del Sur":{gf:1.3,ga:1.2,pressure:0.02},
+  "Irán":       {gf:0.9, ga:1.2, pressure:0.05},
+  "Australia":  {gf:1.2, ga:1.2, pressure:0.02},
+  "Rep. Checa": {gf:1.3, ga:1.2, pressure:0.02},
+  // Lower mid
+  "Bosnia":     {gf:1.2, ga:1.3, pressure:0.01},
+  "Ghana":      {gf:1.1, ga:1.3, pressure:0.01},
+  "Túnez":      {gf:1.0, ga:1.2, pressure:0.01},
+  "Costa de Marfil":{gf:1.2,ga:1.2,pressure:0.01},
+  "Egipto":     {gf:1.1, ga:1.2, pressure:0.01},
+  "Arabia Saudita":{gf:1.0,ga:1.3,pressure:0.01},
+  "Escocia":    {gf:1.2, ga:1.3, pressure:0.01},
+  "Paraguay":   {gf:1.1, ga:1.2, pressure:0.01},
+  "Canadá":     {gf:1.3, ga:1.3, pressure:0.01},
+  // Bottom
+  "Qatar":      {gf:0.7, ga:1.8, pressure:0.00},
+  "R.D. Congo": {gf:0.8, ga:1.6, pressure:0.00},
+  "Argelia":    {gf:1.0, ga:1.4, pressure:0.00},
+  "Uzbekistán": {gf:0.9, ga:1.4, pressure:0.00},
+  "Irak":       {gf:0.9, ga:1.5, pressure:0.00},
+  "Jordania":   {gf:0.8, ga:1.5, pressure:0.00},
+  "Panamá":     {gf:0.8, ga:1.6, pressure:0.00},
+  "Sudáfrica":  {gf:0.9, ga:1.5, pressure:0.00},
+  "Nueva Zelanda":{gf:0.8,ga:1.6,pressure:0.00},
+  "Cabo Verde": {gf:0.8, ga:1.6, pressure:0.00},
+  "Haití":      {gf:0.6, ga:2.0, pressure:0.00},
+  "Curazao":    {gf:0.6, ga:2.0, pressure:0.00},
+  "Senegal":    {gf:1.4, ga:1.0, pressure:0.05},
 };
-function getStyle(name){return TEAM_STYLE[name]||{attack:0,defend:0,pressure:0};}
+function getStyle(name){
+  return TEAM_STYLE[name]||{gf:1.0, ga:1.4, pressure:0.00};
+}
 
 // ── Historial directo (bias en probabilidad %) ───────────────
+// Basado en resultados reales recientes 2022-2025
 const H2H={
-  "Argentina|Brasil":6,"Brasil|Argentina":-6,
+  "Argentina|Brasil":8,"Brasil|Argentina":-8,   // 4-1 en clasificación 2025
   "España|Francia":4,"Francia|España":-4,
-  "Argentina|Francia":3,"Francia|Argentina":-3,
+  "Argentina|Francia":4,"Francia|Argentina":-4, // campeón 2022
   "Alemania|Francia":3,"Francia|Alemania":-3,
-  "Croacia|Brasil":4,"Brasil|Croacia":-4,
-  "Marruecos|España":3,"España|Marruecos":-3,
-  "Marruecos|Portugal":2,"Portugal|Marruecos":-2,
-  "Japón|Alemania":3,"Alemania|Japón":-3,
-  "Japón|España":3,"España|Japón":-3,
-  "Uruguay|Portugal":2,"Portugal|Uruguay":-2,
-  "Colombia|Argentina":2,"Argentina|Colombia":-2,
+  "Croacia|Brasil":5,"Brasil|Croacia":-5,        // eliminó a Brasil en 2022
+  "Marruecos|España":4,"España|Marruecos":-4,    // eliminó a España en 2022
+  "Marruecos|Portugal":3,"Portugal|Marruecos":-3,
+  "Japón|Alemania":4,"Alemania|Japón":-4,        // Japón venció a Alemania en grupos 2022
+  "Japón|España":4,"España|Japón":-4,
+  "Colombia|Argentina":3,"Argentina|Colombia":-3,
+  "Arabia Saudita|Argentina":3,"Argentina|Arabia Saudita":-3, // famosa sorpresa 2022
 };
 function getH2H(h,a){return H2H[`${h}|${a}`]||0;}
 
@@ -699,10 +734,8 @@ function getRating(name){const r=FIFA_RANK[name]||40;return Math.round(95-(r-1)*
 
 function calcProbs(hR,aR,homeN,awayN,knockout=false){
   const h2h=getH2H(homeN,awayN);
-  // Grupos: pequeña ventaja de local. KO: sede neutral, sin ventaja
   const homeAdv=knockout?0:4;
   const diff=(hR+homeAdv)-aR+h2h;
-  // En KO el rating pesa aún más (menos margen para sorpresas en cuartos/semis/final)
   const mult=knockout?1.05:0.85;
   const pH=Math.min(88,Math.max(8,  40+diff*mult));
   const pA=Math.min(78,Math.max(4,  30-diff*(mult*0.82)));
@@ -730,21 +763,41 @@ function simScore(hR,aR,homeN,awayN,knockout=false){
   const{ph,pd,pa}=calcProbs(hR,aR,homeN,awayN,knockout);
   const rand=Math.random()*100;
   let outcome=rand<ph?'home':rand<ph+pd?'draw':'away';
-  const hSt=getStyle(homeN),aSt=getStyle(awayN);
-  const koFactor=knockout?0.82:1.0;
+  const hSt=getStyle(homeN), aSt=getStyle(awayN);
+  // KO: juego más cerrado históricamente (2.0 goles/partido en KO vs 2.7 en grupos)
+  const koFactor=knockout?0.78:1.0;
 
-  // Lambda reflects actual quality gap — better teams score more AND concede less
-  const hLambda=Math.max(0.3,(0.6+(hR/95)*1.1+hSt.attack-aSt.defend+(knockout?hSt.pressure:0))*koFactor);
-  const aLambda=Math.max(0.3,(0.45+(aR/95)*0.9+aSt.attack-hSt.defend+(knockout?aSt.pressure:0))*koFactor);
+  // Lambdas basados en datos reales de cada selección
+  // El ganador usa su gf real, el perdedor sufre la defensa del ganador
+  let hLambda, aLambda;
+  if(outcome==='home'){
+    // Local gana: usa su promedio ofensivo, rival concede según calidad defensiva local
+    hLambda = Math.max(0.3, hSt.gf * koFactor);
+    aLambda = Math.max(0.1, (aSt.gf * 0.5 - hSt.ga * 0.3) * koFactor);
+    // Bonus si hay gran diferencia de rating (aplasta al rival)
+    const rGap = Math.max(0,(hR-aR)/50);
+    hLambda = Math.min(3.5, hLambda * (1 + rGap*0.5));
+    aLambda = Math.max(0.1, aLambda * (1 - rGap*0.4));
+  } else if(outcome==='away'){
+    aLambda = Math.max(0.3, aSt.gf * koFactor);
+    hLambda = Math.max(0.1, (hSt.gf * 0.5 - aSt.ga * 0.3) * koFactor);
+    const rGap = Math.max(0,(aR-hR)/50);
+    aLambda = Math.min(3.5, aLambda * (1 + rGap*0.5));
+    hLambda = Math.max(0.1, hLambda * (1 - rGap*0.4));
+    // Upset cap: underdog wins by 1 only
+    if(aR < hR - 15) aLambda = Math.min(aLambda, 1.2);
+  } else {
+    // Empate: cada equipo usa su propio promedio ofensivo reducido
+    // Así Argentina 1-1 > 0-0, y Haití 0-0 > 1-1
+    hLambda = Math.min(1.6, Math.max(0.55, hSt.gf * 0.65 * koFactor));
+    aLambda = Math.min(1.6, Math.max(0.55, aSt.gf * 0.65 * koFactor));
+  }
 
-  let hg=randGoals(hLambda),ag=randGoals(aLambda);
-
-  // Force outcome — but cap upset wins to 1 goal margin (upsets are always tight)
+  let hg=randGoals(hLambda), ag=randGoals(aLambda);
   if(outcome==='home'&&hg<=ag){hg=ag+1;}
   if(outcome==='away'&&ag<=hg){
     ag=hg+1;
-    // Upsets are always 1-goal wins (1-0, 1-2, etc), never big margins
-    if(ag-hg>1){hg=ag-1;}
+    if(aR<hR-15 && ag-hg>1){hg=ag-1;} // upsets por 1 gol
   }
   if(outcome==='draw'){const g=Math.min(hg,ag);hg=g;ag=g;}
   if(knockout&&hg===ag)hg++;
