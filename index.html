@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v5.0.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v5.1.2 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -320,7 +320,7 @@ img.emoji{height:1.1em;width:1.1em;vertical-align:-0.15em;display:inline-block;}
     <div class="api-indicator"><span class="dot"></span> <span data-t="active"></span></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
       <button class="lang-btn" onclick="toggleLang()">🌐 <span id="lang-label">EN</span></button>
-      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v5.0.0</span>
+      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v5.1.2</span>
     </div>
   </div>
   <!-- Desktop: single nav row -->
@@ -485,7 +485,7 @@ img.emoji{height:1.1em;width:1.1em;vertical-align:-0.15em;display:inline-block;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v5.0.0 · by MonsterAndy</footer>
+<footer class="site-footer">v5.1.2 · by MonsterAndy</footer>
 
 <div class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Volver arriba">↑</div>
 
@@ -765,8 +765,8 @@ const TEAM_PARAMS={
   "Noruega":     {att:1.70, def:0.72, pressure:0.05},
 
   // ── TIER 3: Competitivos ──────────────────────────────────
-  // Colombia: #13 FIFA, finalista Copa América 2024
-  "Colombia":    {att:1.40, def:0.70, pressure:0.08},
+  // Colombia: #13 FIFA, finalista Copa América 2024 (perdió vs Argentina)
+  "Colombia":    {att:1.25, def:0.75, pressure:0.06},
 
   // Senegal: #14 FIFA, AFCON 2025 campeón, 22 goles/3 concedidos en 10j qualifying
   "Senegal":     {att:1.35, def:0.65, pressure:0.10},
@@ -855,7 +855,7 @@ const H2H={
   // Basado en resultados reales 2022-2026
   "Argentina|Brasil":8,"Brasil|Argentina":-8,        // Argentina 4-1 Brasil (Mar 2025)
   "Francia|Brasil":4,"Brasil|Francia":-4,             // Francia venció a Brasil 2025
-  "Francia|Colombia":3,"Colombia|Francia":-3,         // Francia venció a Colombia 2025
+  "Francia|Colombia":4,"Colombia|Francia":-4,         // Francia venció a Colombia 2025
   "España|Francia":3,"Francia|España":-3,             // parejo, España Euro 2024
   "Argentina|Francia":4,"Francia|Argentina":-4,       // Argentina campeón 2022
   "Alemania|Francia":2,"Francia|Alemania":-2,
@@ -864,7 +864,7 @@ const H2H={
   "Marruecos|Portugal":3,"Portugal|Marruecos":-3,     // Marruecos eliminó a Portugal 2022
   "Japón|Alemania":4,"Alemania|Japón":-4,             // Japón venció a Alemania grupos 2022
   "Japón|España":4,"España|Japón":-4,                 // Japón venció a España grupos 2022
-  "Colombia|Argentina":2,"Argentina|Colombia":-2,
+  "Colombia|Argentina":-5,"Argentina|Colombia":5,   // Argentina ganó Copa America 2024 final, domina el H2H
   "Arabia Saudita|Argentina":2,"Argentina|Arabia Saudita":-2, // sorpresa grupos 2022
   "Senegal|Ecuador":2,"Ecuador|Senegal":-2,
   "EE.UU.|Irán":2,"Irán|EE.UU.":-2,
@@ -950,7 +950,15 @@ function simScore(hR,aR,homeN,awayN,knockout=false){
   // Grupos: pequeña ventaja de local (factor 1.1)
   // KO: sede neutral, sin ventaja local; juego más cerrado (0.82)
   const homeAdv = knockout ? 1.0 : 1.1;
-  const koFactor = knockout ? 0.82 : 1.0;
+  // KO factor by phase: groups cautious, but semis/final are OPEN and dramatic
+  // We pass phase context via a global variable set before each KO sim
+  const koPhase = window._currentKOPhase || 'r16';
+  const koFactor = knockout ? (
+    koPhase==='r1' ? 1.10 :   // Final: muy abierto, alta tensión → MÁS goles
+    koPhase==='r2' ? 1.05 :   // Semis: muy parejo → más goles
+    koPhase==='r8' ? 0.95 :   // Cuartos: abierto pero con cuidado
+    0.88                       // 16vos/Octavos: más cautelosos al inicio del KO
+  ) : 1.0;
 
   // Lambdas base: independientes del outcome (modelo puro)
   const hLambdaBase = hP.att * aP.def * LEAGUE_AVG_GOALS * homeAdv * koFactor;
@@ -963,20 +971,28 @@ function simScore(hR,aR,homeN,awayN,knockout=false){
   const ratingGapRev = Math.max(0,(aR-hR)/50);
 
   if(outcome==='home'){
-    hLambda = Math.min(4.0, hLambdaBase * (1 + ratingGap*0.4));
-    aLambda = Math.max(0.08, aLambdaBase * (1 - ratingGap*0.5));
-    // Pressure bonus KO for elite teams
+    hLambda = Math.min(3.5, hLambdaBase * (1 + ratingGap*0.4));
+    // Loser minimum scales with their attacking quality — elite teams always score something
+    const loserMin = Math.max(0.15, aP.att * 0.35);
+    aLambda = Math.max(loserMin, aLambdaBase * (1 - ratingGap*0.5));
+    // Cap winner goals when facing elite defense (def < 0.55)
+    if(aP.def < 0.55) hLambda = Math.min(hLambda, 2.8);
     if(knockout) hLambda *= (1 + hP.pressure * 0.3);
   } else if(outcome==='away'){
-    aLambda = Math.min(4.0, aLambdaBase * (1 + ratingGapRev*0.4));
-    hLambda = Math.max(0.08, hLambdaBase * (1 - ratingGapRev*0.5));
+    aLambda = Math.min(3.5, aLambdaBase * (1 + ratingGapRev*0.4));
+    const loserMin = Math.max(0.15, hP.att * 0.35);
+    hLambda = Math.max(loserMin, hLambdaBase * (1 - ratingGapRev*0.5));
+    if(hP.def < 0.55) aLambda = Math.min(aLambda, 2.8);
     if(knockout) aLambda *= (1 + aP.pressure * 0.3);
-    // Upsets siempre por 1 gol (underdog no puede ganar 3-0 a un top team)
-    if(aR < hR - 15) aLambda = Math.min(aLambda, 1.3);
+    // Upsets siempre ajustados — en fases avanzadas pueden ser 2-1, en 16avos solo 1-0
+    const upsetCap = (koPhase==='r1'||koPhase==='r2') ? 1.8 : 1.3;
+    if(aR < hR - 15) aLambda = Math.min(aLambda, upsetCap);
   } else {
-    // Empate: lambdas sin ajuste de outcome — partido equilibrado
-    hLambda = Math.min(1.8, Math.max(0.5, hLambdaBase));
-    aLambda = Math.min(1.8, Math.max(0.5, aLambdaBase));
+    // Empate: lambdas reflejan la calidad atacante de ambos equipos
+    // Partidos entre top equipos → más goles (1-1, 2-2), no 0-0
+    const drawMin = Math.max(0.6, (hP.att + aP.att) * 0.28);
+    hLambda = Math.min(1.8, Math.max(drawMin, hLambdaBase));
+    aLambda = Math.min(1.8, Math.max(drawMin, aLambdaBase));
   }
 
   let hg=randGoals(hLambda), ag=randGoals(aLambda);
@@ -1684,6 +1700,7 @@ function pendingHtml(title,desc,targetRk,btnLabel){
 async function simKO(rk,idx,silent=false){
   const match=rounds[rk][idx];
   if(!match.home||!match.away)return;
+  window._currentKOPhase = rk; // tells simScore which phase we're in
   const btn=document.getElementById(`bsb-${match.id}`);
   if(btn){btn.disabled=true;btn.innerHTML=`<span class="spinner-sm"></span> ${t('simming')}`;}
   try{
