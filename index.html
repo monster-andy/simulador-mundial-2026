@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v4.9.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v5.0.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -320,7 +320,7 @@ img.emoji{height:1.1em;width:1.1em;vertical-align:-0.15em;display:inline-block;}
     <div class="api-indicator"><span class="dot"></span> <span data-t="active"></span></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
       <button class="lang-btn" onclick="toggleLang()">🌐 <span id="lang-label">EN</span></button>
-      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v4.9.0</span>
+      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v5.0.0</span>
     </div>
   </div>
   <!-- Desktop: single nav row -->
@@ -485,7 +485,7 @@ img.emoji{height:1.1em;width:1.1em;vertical-align:-0.15em;display:inline-block;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v4.9.0 · by MonsterAndy</footer>
+<footer class="site-footer">v5.0.0 · by MonsterAndy</footer>
 
 <div class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Volver arriba">↑</div>
 
@@ -711,67 +711,142 @@ const FIFA_RANK={
   "Curazao":48,       // ~1380 pts
 };
 
-// ── Estilo de juego ──────────────────────────────────────────
-// gf: promedio de goles marcados por partido (calibrado con datos reales 2022-2025)
-// ga: promedio de goles concedidos por partido
-// pressure: bonus en KO para equipos con historial de rendir bajo presión
-const TEAM_STYLE={
-  // Top tier — calibrado con datos reales
-  "Argentina":  {gf:2.4, ga:0.6, pressure:0.20}, // campeón 2022, 4-1 vs Brasil 2025, #3 FIFA
-  "Francia":    {gf:2.4, ga:0.7, pressure:0.18}, // #1 FIFA abril 2026, Mbappe en forma, 2-0 Brasil/Colombia 2025
-  "España":     {gf:2.2, ga:0.7, pressure:0.12}, // 7-0 vs Costa Rica, Eurocopa 2024
-  "Brasil":     {gf:2.0, ga:0.8, pressure:0.10},
-  "Inglaterra": {gf:2.1, ga:0.8, pressure:0.08}, // 6-2 vs Irán Qatar 2022
-  "Portugal":   {gf:2.2, ga:1.0, pressure:0.08}, // 6-1 vs Suiza Qatar 2022
-  "Alemania":   {gf:1.9, ga:1.0, pressure:0.10},
-  "Países Bajos":{gf:1.9,ga:0.9, pressure:0.08},
-  // Upper mid
-  "Uruguay":    {gf:1.3, ga:0.8, pressure:0.10}, // defensivo, bajo en goles
-  "Croacia":    {gf:1.2, ga:0.9, pressure:0.15}, // sube en KO (finalistas 2022)
-  "Bélgica":    {gf:1.7, ga:1.0, pressure:0.05},
-  "Marruecos":  {gf:1.0, ga:0.5, pressure:0.12}, // semifinal 2022, muy sólido atrás
-  "Japón":      {gf:1.4, ga:1.1, pressure:0.08},
-  "Colombia":   {gf:1.5, ga:1.0, pressure:0.05},
-  "México":     {gf:1.4, ga:1.1, pressure:0.00},
-  "Senegal":    {gf:1.4, ga:1.0, pressure:0.05},
-  "Suiza":      {gf:1.3, ga:0.9, pressure:0.08},
-  "EE.UU.":     {gf:1.5, ga:1.1, pressure:0.05},
-  "Noruega":    {gf:1.6, ga:1.1, pressure:0.03}, // Haaland, alto en goles
-  "Turquía":    {gf:1.4, ga:1.2, pressure:0.03},
-  "Austria":    {gf:1.4, ga:1.1, pressure:0.03},
-  "Ecuador":    {gf:1.3, ga:1.1, pressure:0.02},
-  "Suecia":     {gf:1.3, ga:1.1, pressure:0.02},
-  "Corea del Sur":{gf:1.3,ga:1.2,pressure:0.02},
-  "Irán":       {gf:0.9, ga:1.2, pressure:0.05},
-  "Australia":  {gf:1.2, ga:1.2, pressure:0.02},
-  "Rep. Checa": {gf:1.3, ga:1.2, pressure:0.02},
-  // Lower mid
-  "Bosnia":     {gf:1.2, ga:1.3, pressure:0.01},
-  "Ghana":      {gf:1.1, ga:1.3, pressure:0.01},
-  "Túnez":      {gf:1.0, ga:1.2, pressure:0.01},
-  "Costa de Marfil":{gf:1.2,ga:1.2,pressure:0.01},
-  "Egipto":     {gf:1.1, ga:1.2, pressure:0.01},
-  "Arabia Saudita":{gf:1.0,ga:1.3,pressure:0.01},
-  "Escocia":    {gf:1.2, ga:1.3, pressure:0.01},
-  "Paraguay":   {gf:1.1, ga:1.2, pressure:0.01},
-  "Canadá":     {gf:1.3, ga:1.3, pressure:0.01},
-  // Bottom
-  "Qatar":      {gf:0.7, ga:1.8, pressure:0.00},
-  "R.D. Congo": {gf:0.8, ga:1.6, pressure:0.00},
-  "Argelia":    {gf:1.0, ga:1.4, pressure:0.00},
-  "Uzbekistán": {gf:0.9, ga:1.4, pressure:0.00},
-  "Irak":       {gf:0.9, ga:1.5, pressure:0.00},
-  "Jordania":   {gf:0.8, ga:1.5, pressure:0.00},
-  "Panamá":     {gf:0.8, ga:1.6, pressure:0.00},
-  "Sudáfrica":  {gf:0.9, ga:1.5, pressure:0.00},
-  "Nueva Zelanda":{gf:0.8,ga:1.6,pressure:0.00},
-  "Cabo Verde": {gf:0.8, ga:1.6, pressure:0.00},
-  "Haití":      {gf:0.6, ga:2.0, pressure:0.00},
-  "Curazao":    {gf:0.6, ga:2.0, pressure:0.00},
-  "Senegal":    {gf:1.4, ga:1.0, pressure:0.05},
+// ── Parámetros Dixon-Coles calibrados con datos reales 2024-2026 ──
+// att: fuerza ofensiva relativa (promedio league = 1.0)
+// def: solidez defensiva (menor = mejor defensa, <1 es elite)
+// pressure: bonus KO para equipos que históricamente rinden bajo presión eliminatoria
+//
+// Calibración basada en:
+// - Resultados clasificatorias 2024-2026 (CONMEBOL, UEFA, AFC, etc.)
+// - Qatar 2022
+// - Nations League 2024-25
+// - Amistosos relevantes 2025-2026
+const TEAM_PARAMS={
+  // ── TIER 1: Candidatos al título ──────────────────────────
+  // Argentina: #3 FIFA, campeón 2022, 38pts/18j CONMEBOL, 4-1 vs Brasil 2025
+  // Last 5: 3-0 Venezuela, 1-0 Venezuela, 6-0 Puerto Rico, 2-0 Angola, 4-1 Brasil
+  "Argentina":   {att:1.85, def:0.42, pressure:0.20},
+
+  // Francia: #1 FIFA, 16/18pts qualifying solo 4 concedidos, venció Brasil+Colombia 2025
+  // Mbappe en forma, Olise, Ekitike. Nations League SF.
+  "Francia":     {att:1.80, def:0.45, pressure:0.18},
+
+  // España: #2 FIFA, Euro 2024 campeón, 31 partidos sin perder, Yamal/Williams/Pedri
+  "España":      {att:1.75, def:0.48, pressure:0.15},
+
+  // Inglaterra: #4 FIFA, regular en grandes torneos pero sólida
+  "Inglaterra":  {att:1.60, def:0.55, pressure:0.10},
+
+  // Portugal: #5 FIFA, Cristiano + nueva generación Leao/Felix
+  "Portugal":    {att:1.65, def:0.60, pressure:0.10},
+
+  // Brasil: #6 FIFA, en reconstrucción post-Qatar. Estevao emergente
+  "Brasil":      {att:1.55, def:0.58, pressure:0.12},
+
+  // ── TIER 2: Serios candidatos ─────────────────────────────
+  // Países Bajos: #7 FIFA, grupo duro con Japón
+  "Países Bajos":{att:1.50, def:0.62, pressure:0.10},
+
+  // Marruecos: #8 FIFA, semifinal Qatar 2022, defensivamente elite
+  // Solo 3 goles concedidos en 10j clasificatorias
+  "Marruecos":   {att:1.05, def:0.40, pressure:0.15},
+
+  // Bélgica: #9 FIFA, generación de oro en declive pero aún fuerte
+  "Bélgica":     {att:1.45, def:0.68, pressure:0.08},
+
+  // Alemania: #10 FIFA, resurgimiento bajo Nagelsmann
+  "Alemania":    {att:1.50, def:0.65, pressure:0.12},
+
+  // Croacia: #11 FIFA, finalistas 2022, Modric aún presente
+  "Croacia":     {att:1.20, def:0.60, pressure:0.18},
+
+  // Noruega: ~#20 FIFA pero HAALAND - 16 goles en clasificatorias solo él
+  // 37 goles marcados en 8 partidos clasificatorias
+  "Noruega":     {att:1.70, def:0.72, pressure:0.05},
+
+  // ── TIER 3: Competitivos ──────────────────────────────────
+  // Colombia: #13 FIFA, finalista Copa América 2024
+  "Colombia":    {att:1.40, def:0.70, pressure:0.08},
+
+  // Senegal: #14 FIFA, AFCON 2025 campeón, 22 goles/3 concedidos en 10j qualifying
+  "Senegal":     {att:1.35, def:0.65, pressure:0.10},
+
+  // México: #15 FIFA, sede local, factor cancha
+  "México":      {att:1.30, def:0.72, pressure:0.05},
+
+  // EE.UU.: #16 FIFA, anfitrión, Pulisic/Reyna/Musah
+  "EE.UU.":      {att:1.35, def:0.72, pressure:0.08},
+
+  // Uruguay: #17 FIFA, muy defensivo, Suárez/Cavani retirados pero nuevos talentos
+  "Uruguay":     {att:1.15, def:0.58, pressure:0.12},
+
+  // Japón: #18 FIFA, venció a Alemania y España en 2022
+  // 54 goles/3 concedidos en qualifying AFC
+  "Japón":       {att:1.40, def:0.52, pressure:0.10},
+
+  // Suiza: #19 FIFA, muy sólida defensivamente
+  "Suiza":       {att:1.20, def:0.60, pressure:0.10},
+
+  // Turquía: #24 FIFA, talentosos pero irregulares
+  "Turquía":     {att:1.25, def:0.78, pressure:0.05},
+
+  // Austria: #24 FIFA, buena generación actual
+  "Austria":     {att:1.25, def:0.75, pressure:0.05},
+
+  // Corea del Sur: #22 FIFA, Son Heung-min líder
+  "Corea del Sur":{att:1.20, def:0.75, pressure:0.05},
+
+  // Ecuador: #23 FIFA, clasificó bien en CONMEBOL
+  "Ecuador":     {att:1.18, def:0.78, pressure:0.03},
+
+  // Irán: #20 FIFA, defensivo, Asia
+  "Irán":        {att:0.95, def:0.70, pressure:0.05},
+
+  // Australia: clasificó bien, Kuol emergente
+  "Australia":   {att:1.10, def:0.80, pressure:0.03},
+
+  // Rep. Checa: Europa competitiva
+  "Rep. Checa":  {att:1.15, def:0.80, pressure:0.03},
+
+  // ── TIER 4: Por sobre la media ────────────────────────────
+  "Bosnia":      {att:1.05, def:0.88, pressure:0.02},
+  "Argelia":     {att:1.05, def:0.85, pressure:0.02},
+  "Ghana":       {att:1.00, def:0.90, pressure:0.02},
+  "Costa de Marfil":{att:1.10,def:0.88,pressure:0.02},
+  "Egipto":      {att:1.00, def:0.85, pressure:0.02},
+  "Arabia Saudita":{att:0.95,def:0.88,pressure:0.02},
+  "Escocia":     {att:1.05, def:0.90, pressure:0.02},
+  "Paraguay":    {att:1.00, def:0.88, pressure:0.02},
+  "Canadá":      {att:1.15, def:0.85, pressure:0.02},
+
+  // ── TIER 5: Clasificados con dificultad ──────────────────
+  "Qatar":       {att:0.65, def:1.20, pressure:0.00},
+  "R.D. Congo":  {att:0.72, def:1.15, pressure:0.00},
+  "Uzbekistán":  {att:0.80, def:1.05, pressure:0.00},
+  "Irak":        {att:0.82, def:1.05, pressure:0.00},
+  "Jordania":    {att:0.75, def:1.10, pressure:0.00},
+  "Panamá":      {att:0.75, def:1.08, pressure:0.00},
+  "Sudáfrica":   {att:0.82, def:1.05, pressure:0.00},
+  "Nueva Zelanda":{att:0.72,def:1.12, pressure:0.00},
+  "Cabo Verde":  {att:0.75, def:1.10, pressure:0.00},
+  "Haití":       {att:0.55, def:1.30, pressure:0.00},
+  "Curazao":     {att:0.55, def:1.30, pressure:0.00},
+  "Túnez":       {att:0.90, def:0.95, pressure:0.01},
+  "Suecia":      {att:1.10, def:0.88, pressure:0.02},
 };
+
+// Promedio de la liga (para normalización): att=1.0, def=1.0
+// λ_home_goals = att_home × def_away × HOME_ADV
+// λ_away_goals = att_away × def_home
+const LEAGUE_AVG_GOALS = 1.15; // promedio histórico mundiales goles/equipo/partido
+
+function getParams(name){
+  return TEAM_PARAMS[name]||{att:0.85, def:1.10, pressure:0.00};
+}
+// Mantener getStyle como alias para compatibilidad con código existente
 function getStyle(name){
-  return TEAM_STYLE[name]||{gf:1.0, ga:1.4, pressure:0.00};
+  const p=getParams(name);
+  return {gf:p.att*LEAGUE_AVG_GOALS, ga:p.def*LEAGUE_AVG_GOALS, pressure:p.pressure};
 }
 
 // ── Historial directo (bias en probabilidad %) ───────────────
@@ -867,41 +942,48 @@ function simScore(hR,aR,homeN,awayN,knockout=false){
   const{ph,pd,pa}=calcProbs(hR,aR,homeN,awayN,knockout);
   const rand=Math.random()*100;
   let outcome=rand<ph?'home':rand<ph+pd?'draw':'away';
-  const hSt=getStyle(homeN), aSt=getStyle(awayN);
-  // KO: juego más cerrado históricamente (2.0 goles/partido en KO vs 2.7 en grupos)
-  const koFactor=knockout?0.78:1.0;
 
-  // Lambdas basados en datos reales de cada selección
-  // El ganador usa su gf real, el perdedor sufre la defensa del ganador
+  const hP=getParams(homeN), aP=getParams(awayN);
+
+  // ── Dixon-Coles lambda calculation ───────────────────────
+  // λ = att_team × def_opponent × league_avg × context_factor
+  // Grupos: pequeña ventaja de local (factor 1.1)
+  // KO: sede neutral, sin ventaja local; juego más cerrado (0.82)
+  const homeAdv = knockout ? 1.0 : 1.1;
+  const koFactor = knockout ? 0.82 : 1.0;
+
+  // Lambdas base: independientes del outcome (modelo puro)
+  const hLambdaBase = hP.att * aP.def * LEAGUE_AVG_GOALS * homeAdv * koFactor;
+  const aLambdaBase = aP.att * hP.def * LEAGUE_AVG_GOALS * koFactor;
+
+  // Ajuste según outcome: el ganador tiende a atacar más, el perdedor a defender
+  // Esto captura la dinámica del partido (el que va perdiendo no ataca igual)
   let hLambda, aLambda;
+  const ratingGap = Math.max(0,(hR-aR)/50);
+  const ratingGapRev = Math.max(0,(aR-hR)/50);
+
   if(outcome==='home'){
-    // Local gana: usa su promedio ofensivo, rival concede según calidad defensiva local
-    hLambda = Math.max(0.3, hSt.gf * koFactor);
-    aLambda = Math.max(0.1, (aSt.gf * 0.5 - hSt.ga * 0.3) * koFactor);
-    // Bonus si hay gran diferencia de rating (aplasta al rival)
-    const rGap = Math.max(0,(hR-aR)/50);
-    hLambda = Math.min(3.5, hLambda * (1 + rGap*0.5));
-    aLambda = Math.max(0.1, aLambda * (1 - rGap*0.4));
+    hLambda = Math.min(4.0, hLambdaBase * (1 + ratingGap*0.4));
+    aLambda = Math.max(0.08, aLambdaBase * (1 - ratingGap*0.5));
+    // Pressure bonus KO for elite teams
+    if(knockout) hLambda *= (1 + hP.pressure * 0.3);
   } else if(outcome==='away'){
-    aLambda = Math.max(0.3, aSt.gf * koFactor);
-    hLambda = Math.max(0.1, (hSt.gf * 0.5 - aSt.ga * 0.3) * koFactor);
-    const rGap = Math.max(0,(aR-hR)/50);
-    aLambda = Math.min(3.5, aLambda * (1 + rGap*0.5));
-    hLambda = Math.max(0.1, hLambda * (1 - rGap*0.4));
-    // Upset cap: underdog wins by 1 only
-    if(aR < hR - 15) aLambda = Math.min(aLambda, 1.2);
+    aLambda = Math.min(4.0, aLambdaBase * (1 + ratingGapRev*0.4));
+    hLambda = Math.max(0.08, hLambdaBase * (1 - ratingGapRev*0.5));
+    if(knockout) aLambda *= (1 + aP.pressure * 0.3);
+    // Upsets siempre por 1 gol (underdog no puede ganar 3-0 a un top team)
+    if(aR < hR - 15) aLambda = Math.min(aLambda, 1.3);
   } else {
-    // Empate: cada equipo usa su propio promedio ofensivo reducido
-    // Así Argentina 1-1 > 0-0, y Haití 0-0 > 1-1
-    hLambda = Math.min(1.6, Math.max(0.55, hSt.gf * 0.65 * koFactor));
-    aLambda = Math.min(1.6, Math.max(0.55, aSt.gf * 0.65 * koFactor));
+    // Empate: lambdas sin ajuste de outcome — partido equilibrado
+    hLambda = Math.min(1.8, Math.max(0.5, hLambdaBase));
+    aLambda = Math.min(1.8, Math.max(0.5, aLambdaBase));
   }
 
   let hg=randGoals(hLambda), ag=randGoals(aLambda);
   if(outcome==='home'&&hg<=ag){hg=ag+1;}
   if(outcome==='away'&&ag<=hg){
     ag=hg+1;
-    if(aR<hR-15 && ag-hg>1){hg=ag-1;} // upsets por 1 gol
+    if(aR<hR-15 && ag-hg>1){hg=ag-1;}
   }
   if(outcome==='draw'){const g=Math.min(hg,ag);hg=g;ag=g;}
   if(knockout&&hg===ag)hg++;
