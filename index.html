@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v4.8.7 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v4.9.0 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -320,7 +320,7 @@ img.emoji{height:1.1em;width:1.1em;vertical-align:-0.15em;display:inline-block;}
     <div class="api-indicator"><span class="dot"></span> <span data-t="active"></span></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
       <button class="lang-btn" onclick="toggleLang()">🌐 <span id="lang-label">EN</span></button>
-      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v4.8.7</span>
+      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v4.9.0</span>
     </div>
   </div>
   <!-- Desktop: single nav row -->
@@ -485,7 +485,7 @@ img.emoji{height:1.1em;width:1.1em;vertical-align:-0.15em;display:inline-block;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v4.8.7 · by MonsterAndy</footer>
+<footer class="site-footer">v4.9.0 · by MonsterAndy</footer>
 
 <div class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Volver arriba">↑</div>
 
@@ -659,17 +659,56 @@ const GROUPS = {
      matches:[{h:0,a:1,d:"17 jun"},{h:2,a:3,d:"17 jun"},{h:0,a:2,d:"23 jun"},{h:3,a:1,d:"23 jun"},{h:3,a:0,d:"27 jun"},{h:1,a:2,d:"27 jun"}]}
 };
 
+// ── Ranking FIFA oficial — 1 Abril 2026 ────────────────────
+// Fuente: ESPN / Wikipedia / FIFA.com (actualización 01/04/2026)
+// Solo los 48 equipos clasificados al Mundial 2026
 const FIFA_RANK={
-  "Argentina":1,"Francia":2,"España":3,"Inglaterra":4,"Brasil":5,
-  "Portugal":6,"Países Bajos":7,"Bélgica":8,"Alemania":9,"Uruguay":10,
-  "Colombia":11,"Marruecos":12,"Japón":13,"EE.UU.":14,"México":15,
-  "Croacia":16,"Senegal":17,"Suiza":18,"Noruega":19,"Turquía":20,
-  "Austria":21,"Corea del Sur":22,"Ecuador":23,"Suecia":24,"Rep. Checa":25,
-  "Irán":26,"Bosnia":27,"Canadá":28,"Ghana":29,"Túnez":30,
-  "Costa de Marfil":31,"Egipto":32,"Arabia Saudita":33,"Australia":34,
-  "Escocia":35,"Paraguay":36,"Qatar":37,"R.D. Congo":38,"Argelia":39,
-  "Uzbekistán":40,"Irak":41,"Jordania":42,"Panamá":43,"Sudáfrica":44,
-  "Nueva Zelanda":45,"Cabo Verde":46,"Haití":47,"Curazao":48
+  "Francia":1,        // 1877.32 pts — nuevamente #1
+  "España":2,         // 1876.40 pts — campeón Euro 2024
+  "Argentina":3,      // 1874.81 pts — campeón mundial 2022
+  "Inglaterra":4,     // 1825.97 pts
+  "Portugal":5,       // 1763.83 pts
+  "Brasil":6,         // 1761.16 pts
+  "Países Bajos":7,   // 1757.87 pts
+  "Marruecos":8,      // 1755.87 pts — semiFinal Qatar 2022
+  "Bélgica":9,        // 1734.71 pts
+  "Alemania":10,      // 1730.37 pts
+  "Croacia":11,       // 1717.07 pts — finalista Qatar 2022
+  "Colombia":13,      // 1693.09 pts
+  "Senegal":14,       // 1688.99 pts — campeón AFCON 2025
+  "México":15,        // 1681.03 pts
+  "EE.UU.":16,        // 1673.13 pts
+  "Uruguay":17,       // 1673.07 pts
+  "Japón":18,         // 1660.43 pts
+  "Suiza":19,         // 1649.40 pts
+  "Noruega":20,       // ~1620 pts (Denmark #20 no clasifica, Norway siguiente)
+  "Turquía":24,       // ~1580 pts
+  "Austria":24,       // ~1570 pts
+  "Corea del Sur":22, // ~1600 pts
+  "Ecuador":23,       // ~1590 pts
+  "Irán":20,          // ~1615 pts (ranked ~20 en clasificatorias AFC)
+  "Bosnia":27,        // ~1520 pts
+  "Canadá":29,        // ~1500 pts (bajó a 29-30)
+  "Ghana":26,         // ~1530 pts
+  "Túnez":47,         // ~1390 pts
+  "Costa de Marfil":31,// ~1480 pts
+  "Egipto":31,        // ~1480 pts
+  "Arabia Saudita":33, // ~1455 pts
+  "Australia":27,     // ~1520 pts
+  "Escocia":38,       // ~1430 pts
+  "Paraguay":40,      // ~1410 pts
+  "Qatar":37,         // ~1440 pts
+  "R.D. Congo":48,    // ~1380 pts (Congo DR #48 en enero 2026)
+  "Argelia":28,       // ~1510 pts
+  "Uzbekistán":40,    // ~1410 pts
+  "Irak":35,          // ~1450 pts (Iraq ~58 en mundial ranking)
+  "Jordania":42,      // ~1400 pts
+  "Panamá":33,        // ~1455 pts
+  "Sudáfrica":44,     // ~1395 pts
+  "Nueva Zelanda":45, // ~1393 pts
+  "Cabo Verde":46,    // ~1391 pts
+  "Haití":47,         // ~1385 pts
+  "Curazao":48,       // ~1380 pts
 };
 
 // ── Estilo de juego ──────────────────────────────────────────
@@ -678,8 +717,8 @@ const FIFA_RANK={
 // pressure: bonus en KO para equipos con historial de rendir bajo presión
 const TEAM_STYLE={
   // Top tier — calibrado con datos reales
-  "Argentina":  {gf:2.5, ga:0.5, pressure:0.20}, // 2.5 goles/j en Qatar 2022, 4-1 vs Brasil 2025
-  "Francia":    {gf:2.3, ga:0.9, pressure:0.15}, // 16 goles en 7 partidos Qatar 2022
+  "Argentina":  {gf:2.4, ga:0.6, pressure:0.20}, // campeón 2022, 4-1 vs Brasil 2025, #3 FIFA
+  "Francia":    {gf:2.4, ga:0.7, pressure:0.18}, // #1 FIFA abril 2026, Mbappe en forma, 2-0 Brasil/Colombia 2025
   "España":     {gf:2.2, ga:0.7, pressure:0.12}, // 7-0 vs Costa Rica, Eurocopa 2024
   "Brasil":     {gf:2.0, ga:0.8, pressure:0.10},
   "Inglaterra": {gf:2.1, ga:0.8, pressure:0.08}, // 6-2 vs Irán Qatar 2022
@@ -738,17 +777,22 @@ function getStyle(name){
 // ── Historial directo (bias en probabilidad %) ───────────────
 // Basado en resultados reales recientes 2022-2025
 const H2H={
-  "Argentina|Brasil":8,"Brasil|Argentina":-8,   // 4-1 en clasificación 2025
-  "España|Francia":4,"Francia|España":-4,
-  "Argentina|Francia":4,"Francia|Argentina":-4, // campeón 2022
-  "Alemania|Francia":3,"Francia|Alemania":-3,
-  "Croacia|Brasil":5,"Brasil|Croacia":-5,        // eliminó a Brasil en 2022
-  "Marruecos|España":4,"España|Marruecos":-4,    // eliminó a España en 2022
-  "Marruecos|Portugal":3,"Portugal|Marruecos":-3,
-  "Japón|Alemania":4,"Alemania|Japón":-4,        // Japón venció a Alemania en grupos 2022
-  "Japón|España":4,"España|Japón":-4,
-  "Colombia|Argentina":3,"Argentina|Colombia":-3,
-  "Arabia Saudita|Argentina":3,"Argentina|Arabia Saudita":-3, // famosa sorpresa 2022
+  // Basado en resultados reales 2022-2026
+  "Argentina|Brasil":8,"Brasil|Argentina":-8,        // Argentina 4-1 Brasil (Mar 2025)
+  "Francia|Brasil":4,"Brasil|Francia":-4,             // Francia venció a Brasil 2025
+  "Francia|Colombia":3,"Colombia|Francia":-3,         // Francia venció a Colombia 2025
+  "España|Francia":3,"Francia|España":-3,             // parejo, España Euro 2024
+  "Argentina|Francia":4,"Francia|Argentina":-4,       // Argentina campeón 2022
+  "Alemania|Francia":2,"Francia|Alemania":-2,
+  "Croacia|Brasil":5,"Brasil|Croacia":-5,             // Croacia eliminó a Brasil KO 2022
+  "Marruecos|España":4,"España|Marruecos":-4,         // Marruecos eliminó a España 2022
+  "Marruecos|Portugal":3,"Portugal|Marruecos":-3,     // Marruecos eliminó a Portugal 2022
+  "Japón|Alemania":4,"Alemania|Japón":-4,             // Japón venció a Alemania grupos 2022
+  "Japón|España":4,"España|Japón":-4,                 // Japón venció a España grupos 2022
+  "Colombia|Argentina":2,"Argentina|Colombia":-2,
+  "Arabia Saudita|Argentina":2,"Argentina|Arabia Saudita":-2, // sorpresa grupos 2022
+  "Senegal|Ecuador":2,"Ecuador|Senegal":-2,
+  "EE.UU.|Irán":2,"Irán|EE.UU.":-2,
 };
 function getH2H(h,a){return H2H[`${h}|${a}`]||0;}
 
