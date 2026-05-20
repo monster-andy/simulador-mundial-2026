@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v5.2.0 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v5.2.1 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -320,7 +320,7 @@ img.emoji{height:1.1em;width:1.1em;vertical-align:-0.15em;display:inline-block;}
     <div class="api-indicator"><span class="dot"></span> <span data-t="active"></span></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
       <button class="lang-btn" onclick="toggleLang()">🌐 <span id="lang-label">EN</span></button>
-      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v5.2.0</span>
+      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v5.2.1</span>
     </div>
   </div>
   <!-- Desktop: single nav row -->
@@ -485,7 +485,7 @@ img.emoji{height:1.1em;width:1.1em;vertical-align:-0.15em;display:inline-block;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v5.2.0 · by MonsterAndy</footer>
+<footer class="site-footer">v5.2.1 · by MonsterAndy</footer>
 
 <div class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Volver arriba">↑</div>
 
@@ -797,7 +797,7 @@ const TEAM_PARAMS={
   "Corea del Sur":{att:1.20, def:0.75, pressure:0.05},
 
   // Ecuador: #23 FIFA, clasificó bien en CONMEBOL
-  "Ecuador":     {att:1.18, def:0.78, pressure:0.03},
+  "Ecuador":     {att:0.98, def:0.82, pressure:0.02}, // 4to CONMEBOL, pierde vs Brasil/Argentina
 
   // Irán: #20 FIFA, defensivo, Asia
   "Irán":        {att:0.95, def:0.70, pressure:0.05},
@@ -811,13 +811,13 @@ const TEAM_PARAMS={
   // ── TIER 4: Por sobre la media ────────────────────────────
   "Bosnia":      {att:1.05, def:0.88, pressure:0.02},
   "Argelia":     {att:1.05, def:0.85, pressure:0.02},
-  "Ghana":       {att:1.00, def:0.90, pressure:0.02},
+  "Ghana":       {att:0.92, def:0.92, pressure:0.01},
   "Costa de Marfil":{att:1.10,def:0.88,pressure:0.02},
   "Egipto":      {att:1.00, def:0.85, pressure:0.02},
-  "Arabia Saudita":{att:0.95,def:0.88,pressure:0.02},
-  "Escocia":     {att:1.05, def:0.90, pressure:0.02},
-  "Paraguay":    {att:1.00, def:0.88, pressure:0.02},
-  "Canadá":      {att:1.15, def:0.85, pressure:0.02},
+  "Arabia Saudita":{att:0.88,def:0.90,pressure:0.01},
+  "Escocia":     {att:0.95, def:0.92, pressure:0.01},
+  "Paraguay":    {att:0.92, def:0.90, pressure:0.01},
+  "Canadá":      {att:1.05, def:0.82, pressure:0.02}, // primer mundial en 2026
 
   // ── TIER 5: Clasificados con dificultad ──────────────────
   "Qatar":       {att:0.65, def:1.20, pressure:0.00},
@@ -984,9 +984,17 @@ function simScore(hR,aR,homeN,awayN,knockout=false){
     hLambda = Math.max(loserMinH, hLambdaBase * (1 - ratingGapRev*0.5));
     if(hP.def < 0.55) aLambda = Math.min(aLambda, 2.8);
     if(knockout) aLambda *= (1 + aP.pressure * 0.3);
-    // Upsets: cap scoreline based on phase
-    const upsetCap = (koPhase==='r1'||koPhase==='r2') ? 1.9 : 1.4;
-    if(aR < hR - 15) aLambda = Math.min(aLambda, upsetCap);
+    // Cap away team goals based on rating gap — bigger gap = harder to score
+    const ratingDiff = hR - aR;
+    if(ratingDiff > 20){
+      // Large gap: away team very unlikely to score 3+
+      const bigGapCap = knockout ? ((koPhase==='r1'||koPhase==='r2') ? 1.6 : 1.2) : 1.1;
+      aLambda = Math.min(aLambda, bigGapCap);
+    } else if(ratingDiff > 10){
+      // Medium gap: still constrained
+      const medGapCap = knockout ? 2.0 : 1.5;
+      aLambda = Math.min(aLambda, medGapCap);
+    }
   } else {
     // Draw: use each team's natural lambda — no artificial floor
     // This produces realistic 1-1 for top teams, 0-0 for defensive ones
