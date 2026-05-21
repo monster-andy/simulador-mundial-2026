@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v5.2.1 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v5.2.2 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -320,7 +320,7 @@ img.emoji{height:1.1em;width:1.1em;vertical-align:-0.15em;display:inline-block;}
     <div class="api-indicator"><span class="dot"></span> <span data-t="active"></span></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
       <button class="lang-btn" onclick="toggleLang()">🌐 <span id="lang-label">EN</span></button>
-      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v5.2.1</span>
+      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v5.2.2</span>
     </div>
   </div>
   <!-- Desktop: single nav row -->
@@ -485,7 +485,7 @@ img.emoji{height:1.1em;width:1.1em;vertical-align:-0.15em;display:inline-block;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v5.2.1 · by MonsterAndy</footer>
+<footer class="site-footer">v5.2.2 · by MonsterAndy</footer>
 
 <div class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Volver arriba">↑</div>
 
@@ -868,6 +868,13 @@ const H2H={
   "Arabia Saudita|Argentina":2,"Argentina|Arabia Saudita":-2, // sorpresa grupos 2022
   "Senegal|Ecuador":2,"Ecuador|Senegal":-2,
   "EE.UU.|Irán":2,"Irán|EE.UU.":-2,
+  // Argentina dominates CONMEBOL/CONCACAF rivals historically
+  "Argentina|México":5,"México|Argentina":-5,
+  "Argentina|Ecuador":6,"Ecuador|Argentina":-6,
+  "Argentina|Uruguay":4,"Uruguay|Argentina":-4,
+  "Argentina|Irán":4,"Irán|Argentina":-4,
+  "Argentina|Austria":3,"Austria|Argentina":-3,
+  "Argentina|Argelia":5,"Argelia|Argentina":-5,
 };
 function getH2H(h,a){return H2H[`${h}|${a}`]||0;}
 
@@ -996,10 +1003,11 @@ function simScore(hR,aR,homeN,awayN,knockout=false){
       aLambda = Math.min(aLambda, medGapCap);
     }
   } else {
-    // Draw: use each team's natural lambda — no artificial floor
-    // This produces realistic 1-1 for top teams, 0-0 for defensive ones
-    hLambda = Math.min(1.9, Math.max(hLambdaBase * 0.9, hP.att * 0.50));
-    aLambda = Math.min(1.9, Math.max(aLambdaBase * 0.9, aP.att * 0.50));
+    // Draw: lambdas reflect actual match context
+    // Use natural base lambda but ensure top teams always create chances
+    // Floor = max(base*0.85, att*0.45) — avoids 0-0 for strong attackers
+    hLambda = Math.min(1.9, Math.max(hLambdaBase * 0.85, hP.att * 0.48));
+    aLambda = Math.min(1.9, Math.max(aLambdaBase * 0.85, aP.att * 0.48));
   }
 
   let hg=randGoals(hLambda), ag=randGoals(aLambda);
@@ -1008,7 +1016,16 @@ function simScore(hR,aR,homeN,awayN,knockout=false){
     ag=hg+1;
     if(aR<hR-15 && ag-hg>1){hg=ag-1;}
   }
-  if(outcome==='draw'){const g=Math.min(hg,ag);hg=g;ag=g;}
+  if(outcome==='draw'){
+    const g=Math.min(hg,ag); hg=g; ag=g;
+    // 0-0 is rare in World Cup (~8% of matches) — if both 0, convert to 1-1
+    // with probability based on team quality (top teams almost never 0-0)
+    if(hg===0&&ag===0){
+      const avgAtt=(hP.att+aP.att)/2;
+      const p11=Math.min(0.85, avgAtt*0.55); // stronger teams → higher chance of 1-1
+      if(Math.random()<p11){hg=1;ag=1;}
+    }
+  }
   if(knockout&&hg===ag)hg++;
   return{hg,ag,ph,pd,pa};
 }
