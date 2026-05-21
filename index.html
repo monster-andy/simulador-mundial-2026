@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SIMULADOR MUNDIAL 2026 · v5.2.2 · by MonsterAndy -->
+<!-- SIMULADOR MUNDIAL 2026 · v5.2.4 · by MonsterAndy -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -100,6 +100,8 @@ main{max-width:640px;margin:0 auto;padding:1.25rem;}
 .btn-primary.has-pending{background:#d97706;animation:pulse-btn 1.5s ease-in-out infinite;padding:10px 32px;font-size:16px;min-width:180px;}
 .btn-primary.has-next{background:#16a34a;padding:10px 32px;font-size:16px;min-width:180px;}
 .btn-primary.has-next:hover{opacity:.85;}
+.btn-primary.has-reset{background:transparent;color:var(--red);border:1.5px solid var(--red);padding:10px 32px;font-size:16px;min-width:180px;}
+.btn-primary.has-reset:hover{background:rgba(239,68,68,.08);}
 .btn-icon-reset{width:32px;height:32px;padding:0;background:transparent;color:var(--muted);
   border:none;border-radius:7px;cursor:pointer;transition:all .2s;
   display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
@@ -308,7 +310,7 @@ img.emoji{height:1.1em;width:1.1em;vertical-align:-0.15em;display:inline-block;}
 
 <header>
   <div class="header-inner">
-  <div class="logo">
+  <div class="logo" onclick="showSection('grupos')" style="cursor:pointer;" title="Volver a Grupos">
     <div class="logo-left">
       <span class="logo-line1" id="logo-line1">SIMULADOR</span>
       <span class="logo-line2" id="logo-line2">MUNDIAL</span>
@@ -320,7 +322,7 @@ img.emoji{height:1.1em;width:1.1em;vertical-align:-0.15em;display:inline-block;}
     <div class="api-indicator"><span class="dot"></span> <span data-t="active"></span></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
       <button class="lang-btn" onclick="toggleLang()">🌐 <span id="lang-label">EN</span></button>
-      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v5.2.2</span>
+      <span id="header-version" style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.5px;">v5.2.4</span>
     </div>
   </div>
   <!-- Desktop: single nav row -->
@@ -485,7 +487,7 @@ img.emoji{height:1.1em;width:1.1em;vertical-align:-0.15em;display:inline-block;}
   <div id="champion-display" class="champion-display" style="display:none"></div>
 </div>
 </main>
-<footer class="site-footer">v5.2.2 · by MonsterAndy</footer>
+<footer class="site-footer">v5.2.4 · by MonsterAndy</footer>
 
 <div class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Volver arriba">↑</div>
 
@@ -509,7 +511,7 @@ const LANG = {
     r1_title:'GRAN FINAL', r1_sub:'MetLife Stadium, Nueva Jersey · 19 de julio 2026',
     sim_auto:'Simulación automática', sim_auto_desc:'Simula todos los partidos de esta fase con un clic',
     ko_action_desc:'Simulá partidos individuales o toda la ronda',
-    btn_sim_all:'⚡ SIMULAR TODOS', btn_resim_all:'↺ Resimular todos', btn_resim_short:'↺ Resimular', btn_reset:'🗑', btn_continue:'CONTINUAR', btn_next:'PRÓXIMA FASE →', btn_sim_final:'⚡ SIMULAR FINAL', btn_final_done:'✓ FINAL SIMULADA', btn_restart:'↩ Volver al Comienzo',
+    btn_sim_all:'⚡ SIMULAR TODOS', btn_resim_all:'↺ Resimular todos', btn_resim_short:'↺ Resimular', btn_reset:'🗑', btn_continue:'CONTINUAR', btn_next:'PRÓXIMA FASE →', btn_sim_final:'⚡ SIMULAR FINAL', btn_final_done:'✓ FINAL SIMULADA', btn_restart:'↩ Volver al Comienzo', btn_reset_sim:'↺ RESETEAR SIM',
     cancel:'Cancelar', confirm_yes:'Sí, resetear',
     confirm_reset_title:'¿Resetear esta sección?',
     confirm_reset_msg:'Se borrarán los resultados de esta ronda y todas las siguientes.',
@@ -541,7 +543,7 @@ const LANG = {
     r1_title:'THE FINAL', r1_sub:'MetLife Stadium, New Jersey · July 19, 2026',
     sim_auto:'Auto-simulate', sim_auto_desc:'Simulate all matches in this stage with one click',
     ko_action_desc:'Simulate individual matches or the entire round',
-    btn_sim_all:'⚡ SIMULATE ALL', btn_resim_all:'↺ Re-simulate all', btn_resim_short:'↺ Re-simulate', btn_reset:'🗑', btn_continue:'CONTINUE', btn_next:'NEXT PHASE →', btn_sim_final:'⚡ SIMULATE FINAL', btn_final_done:'✓ FINAL SIMULATED', btn_restart:'↩ Back to Start',
+    btn_sim_all:'⚡ SIMULATE ALL', btn_resim_all:'↺ Re-simulate all', btn_resim_short:'↺ Re-simulate', btn_reset:'🗑', btn_continue:'CONTINUE', btn_next:'NEXT PHASE →', btn_sim_final:'⚡ SIMULATE FINAL', btn_final_done:'✓ FINAL SIMULATED', btn_restart:'↩ Back to Start', btn_reset_sim:'↺ RESET SIM',
     cancel:'Cancel', confirm_yes:'Yes, reset',
     confirm_reset_title:'Reset this section?',
     confirm_reset_msg:'Results for this round and all following rounds will be cleared.',
@@ -725,7 +727,7 @@ const TEAM_PARAMS={
   // ── TIER 1: Candidatos al título ──────────────────────────
   // Argentina: #3 FIFA, campeón 2022, 38pts/18j CONMEBOL, 4-1 vs Brasil 2025
   // Last 5: 3-0 Venezuela, 1-0 Venezuela, 6-0 Puerto Rico, 2-0 Angola, 4-1 Brasil
-  "Argentina":   {att:1.85, def:0.42, pressure:0.20},
+  "Argentina":   {att:1.85, def:0.42, pressure:0.20, champion:true}, // campeón Qatar 2022
 
   // Francia: #1 FIFA, 16/18pts qualifying solo 4 concedidos, venció Brasil+Colombia 2025
   // Mbappe en forma, Olise, Ekitike. Nations League SF.
@@ -918,8 +920,11 @@ function getRating(name){const r=FIFA_RANK[name]||40;return Math.round(95-(r-1)*
 function calcProbs(hR,aR,homeN,awayN,knockout=false){
   const h2h=getH2H(homeN,awayN);
   const homeAdv=knockout?0:4;
-  const diff=(hR+homeAdv)-aR+h2h;
-  // Bigger gap → multiplier grows → top teams dominate weak teams more
+  // Defending champion bonus: Argentina gets +4 in all KO matches
+  // Based on: champions have mental edge, experience, pressure handling
+  const championBonus=(knockout&&(homeN==='Argentina'||awayN==='Argentina'))
+    ? (homeN==='Argentina' ? 4 : -4) : 0;
+  const diff=(hR+homeAdv)-aR+h2h+championBonus;
   const baseMult=knockout?1.10:0.90;
   const gapBoost=Math.max(0,(Math.abs(diff)-15)/80);
   const mult=baseMult+gapBoost;
@@ -985,12 +990,15 @@ function simScore(hR,aR,homeN,awayN,knockout=false){
     // Cap winner vs elite defense
     if(aP.def < 0.55) hLambda = Math.min(hLambda, 2.8);
     if(knockout) hLambda *= (1 + hP.pressure * 0.3);
+    // Defending champion extra boost in KO — they know how to win these games
+    if(knockout && hP.champion) hLambda *= 1.08;
   } else if(outcome==='away'){
     aLambda = Math.min(3.5, aLambdaBase * (1 + ratingGapRev*0.4));
     const loserMinH = Math.max(0.25, hP.att * 0.55); // top attackers always threaten
     hLambda = Math.max(loserMinH, hLambdaBase * (1 - ratingGapRev*0.5));
     if(hP.def < 0.55) aLambda = Math.min(aLambda, 2.8);
     if(knockout) aLambda *= (1 + aP.pressure * 0.3);
+    if(knockout && aP.champion) aLambda *= 1.08;
     // Cap away team goals based on rating gap — bigger gap = harder to score
     const ratingDiff = hR - aR;
     if(ratingDiff > 20){
@@ -1071,7 +1079,8 @@ function showSection(name,btn){
   document.querySelectorAll('.nav-tab').forEach(t=>{
     if(sectionMap[t.getAttribute('data-t')]===name) t.classList.add('active');
   });
-  if(name!=='grupos') renderBracket(name);
+  if(name==='grupos') updateGroupsButtonState();
+  else renderBracket(name);
 }
 
 // ============================================================
@@ -1400,26 +1409,32 @@ function updateGroupsProgress(){
 function updateGroupsButtonState(){
   const btn=document.getElementById('btn-sim-all-groups');
   if(!btn) return;
-  const totalMatches=Object.values(GROUPS).reduce((a,g)=>a+g.matches.length,0);
   const doneMatches=Object.keys(groupResults).length;
   const allDone=groupsDone();
   const someDone=doneMatches>0;
+  const finalDone=rounds.r1&&rounds.r1[0]&&rounds.r1[0].winner;
 
-  if(allDone){
+  if(finalDone){
+    // Final already simulated — offer full reset
+    btn.classList.remove('has-next','has-pending');
+    btn.classList.add('has-reset');
+    btn.innerHTML=t('btn_reset_sim');
+    btn.onclick=()=>restartSimulator();
+  } else if(allDone){
     // All groups done → green next phase
     btn.classList.add('has-next');
-    btn.classList.remove('has-pending');
+    btn.classList.remove('has-pending','has-reset');
     btn.innerHTML=t('btn_next');
     btn.onclick=()=>showSection('r16');
   } else if(someDone){
     // Some done, some pending → orange continue
-    btn.classList.remove('has-next');
+    btn.classList.remove('has-next','has-reset');
     btn.classList.add('has-pending');
     btn.innerHTML='⚠ '+t('btn_continue');
     btn.onclick=()=>simAllGroups();
   } else {
     // Nothing done → yellow simulate all
-    btn.classList.remove('has-next','has-pending');
+    btn.classList.remove('has-next','has-pending','has-reset');
     btn.innerHTML=t('btn_sim_all');
     btn.onclick=()=>simAllGroups();
   }
